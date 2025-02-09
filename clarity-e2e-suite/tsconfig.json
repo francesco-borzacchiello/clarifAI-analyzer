@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    // Specifica la versione di JavaScript a cui compilare il codice TypeScript. ES6 è una versione moderna di JavaScript.
+    "target": "ES6",
+    // Specifica il sistema di moduli da utilizzare. CommonJS è il sistema di moduli utilizzato da Node.js.
+    "module": "commonjs",
+    // Specifica la directory di output per i file compilati. In questo caso, i file compilati verranno salvati nella cartella "dist".
+    "outDir": "./dist",
+    // Specifica la directory radice dei file sorgente. In questo caso, i file sorgente si trovano nella cartella "src".
+    "rootDir": "./src",
+    // Abilita tutte le opzioni di controllo rigoroso del tipo. Questo aiuta a catturare errori di tipo durante la compilazione.
+    "strict": true,
+    // Abilita l'interoperabilità con i moduli ES. Questo permette di importare moduli CommonJS utilizzando la sintassi di importazione ES6.
+    "esModuleInterop": true,
+    // Salta il controllo dei tipi nei file di dichiarazione delle librerie (.d.ts). Questo può velocizzare la compilazione.
+    "skipLibCheck": true,
+    // Impone l'uso coerente delle maiuscole/minuscole nei nomi dei file. Questo aiuta a evitare problemi su file system sensibili alle maiuscole/minuscole.
+    "forceConsistentCasingInFileNames": true
+  },
+  // Specifica i file da includere nella compilazione. In questo caso, tutti i file nella cartella "src" e nelle sue sottocartelle.
+  "include": ["src/**/*"]
+}
