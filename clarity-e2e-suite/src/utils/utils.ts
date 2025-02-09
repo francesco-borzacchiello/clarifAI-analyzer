@@ -46,24 +46,32 @@ export function compareJsons(json1: BarChartJson, json2: BarChartJson) {
 }
 
 export function equalsJsons(
-    json1: BarChartJson,
-    json2: BarChartJson,
+    oracle: BarChartJson,
+    effective: BarChartJson,
     errorMessage: string
 ) {
-    for (const key in json1) {
-        expect.soft(json2[key], `${key} ${errorMessage}`).toBeDefined();
-        if (json2[key]) {
-            for (const subKey in json1[key]) {
-                expect.soft(json2[key][subKey], `${key}.${subKey} ${errorMessage}`).toBeDefined();
-                if (json2[key][subKey] !== undefined) {
+    let assertions = 0;
+    let failures = 0;
+
+    for (const key in oracle) {
+        assertions++;
+        expect.soft(effective[key], `${key} ${errorMessage}`).toBeDefined();
+        if (effective[key]) {
+            for (const subKey in oracle[key]) {
+                assertions++;
+                expect.soft(effective[key][subKey], `${key}.${subKey} ${errorMessage}`).toBeDefined();
+                if (effective[key][subKey] !== undefined) {
                     expect.soft(
-                        json1[key][subKey] === json2[key][subKey],
-                        `${key} - ${subKey}: ${json1[key][subKey]} = ${json2[key][subKey]}`
+                        oracle[key][subKey] === effective[key][subKey],
+                        `${key} - ${subKey}: ${oracle[key][subKey]} = ${effective[key][subKey]}`
                     ).toBeTruthy();
-                }
+                    if (oracle[key][subKey] !== effective[key][subKey]) failures++;
+                } else failures++;
             }
-        }
+        } else failures++;
     }
+
+    return { assertions, failures };
 }
 
 // Funzione per fare lo screenshot del canvas

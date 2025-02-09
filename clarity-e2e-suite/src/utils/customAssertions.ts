@@ -1,42 +1,37 @@
-import { expect, Page } from '@playwright/test';
-import { BarChartJson } from './utils';
+import { test, expect as baseExpext } from '@playwright/test';
+import { BarChartJson, equalsJsons, generateFileName, generateJsonFileName } from './utils';
 import { VisionDeficiency } from '../enums/visionDeficiency';
-import { testVisionDeficiencyVersusNormalVision } from './visionDeficiencyUtils';
+import { testProtanopia, testVisionDeficiencyVersusNormalVision } from './visionDeficiencyUtils';
 
-    page: Page, 
-    testInfo: TestInfo,
-    baseUrlChart: string, 
-    canvasSelector: string, 
-    outputFilePath: string, 
-    jsonFilePath: string,
-    oracle: BarChartJson | null = null
-)
+export const expect = baseExpext.extend({
+  async isAccessibleWithVisionDeficiency(
+    oracle: BarChartJson,
+    effective: BarChartJson,
+    errorMessage: string
+) {
+    const { assertions, failures } = equalsJsons(oracle, effective, errorMessage);
+    const percentage = (failures / assertions) * 100;
+    
+    const accessibilityMessage = percentage === 0
+      ? 'fully accessible'
+      : percentage <= 50
+      ? 'partially accessible'
+      : 'not accessible';
 
-expect.extend({
-  async isAccessibleWithProtanopia(
-    page: Page,
-     json: BarChartJson, baseUrlChart: string, canvasSelector: string, from: number, to: number) {
-    const testInfo = this;
-    const outputFilePath = generateFileName('chart-3', from, to, VisionDeficiency.Protanopia);
-    const jsonFilePath = generateJsonFileName('api-response', from, to, VisionDeficiency.Protanopia);
+    let resultMessagge = `The chart is ${accessibilityMessage}. Assertions: ${assertions}, Failures: ${failures}, Percentage: ${percentage.toFixed(2)}%`;
 
-    const jsonDeficiency = await testVisionDeficiencyVersusNormalVision(
-      page,
-      testInfo: TestInfo,
-      baseUrlChart,
-      canvasSelector,
-      outputFilePath,
-      jsonFilePath,
-      VisionDeficiency.Protanopia,
-      json
-    );
+    test.info().annotations.push({
+        type: "accessibility-check",
+        description: resultMessagge
+    });
 
     return {
-      pass: true,
-      message: () => `Expected chart to be accessible with Protanopia`,
+      pass: percentage === 0,
+      message: () => resultMessagge
     };
-  },
+  }
 
+/*
   async isAccessibleWithDeuteranopia(page, json: BarChartJson, baseUrlChart: string, canvasSelector: string, from: number, to: number) {
     const testInfo = this;
     const outputFilePath = generateFileName('chart-3', from, to, VisionDeficiency.Deuteranopia);
@@ -79,5 +74,6 @@ expect.extend({
       pass: true,
       message: () => `Expected chart to be accessible with Tritanopia`,
     };
-  },
+  }
+*/
 });

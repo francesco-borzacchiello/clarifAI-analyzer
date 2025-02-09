@@ -1,6 +1,7 @@
 import { Page, TestInfo } from '@playwright/test';
 import { VisionDeficiency } from '../enums/visionDeficiency';
 import { BarChartJson, captureScreenshotWithVisionDeficiency, extractJsonFromBarChart, logImageAndJson, equalsJsons, logJson} from './utils';
+import { expect } from './customAssertions';
 
 async function captureAndExtractJson(
     page: Page, 
@@ -61,6 +62,19 @@ export async function testVisionDeficiencyVersusNormalVision(
 
     if (oracle) logJson(testInfo, "oracle.json", oracle);
 
+    await expect(
+        !oracle
+        ? await testNormalVision(
+            page,
+            testInfo,
+            baseUrlChart,
+            canvasSelector,
+            "normal-vision-reference.png",
+            "normal-vision-reference.json"
+        ) : oracle
+    ).isAccessibleWithVisionDeficiency(jsonDeficiency, ` in ${deficiencyType} vision`);
+
+    /*
     equalsJsons(
         !oracle
         ? await testNormalVision(
@@ -74,6 +88,7 @@ export async function testVisionDeficiencyVersusNormalVision(
         jsonDeficiency,
         ` in ${deficiencyType} vision`
     );
+    */
 }
 
 export async function testProtanopia(
