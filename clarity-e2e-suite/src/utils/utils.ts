@@ -1,78 +1,6 @@
 import { expect, Page, TestInfo } from '@playwright/test';
-import axios from 'axios'; // Assicurati di installare axios: npm install axios
-import fs from 'fs'; // Libreria nativa per leggere i file
-import FormData from 'form-data';
 import { VisionDeficiency } from '../enums/visionDeficiency';
-
-interface RiskCounts {
-    [riskCategory: string]: number;
-}
-
-export interface BarChartJson {
-    [personName: string]: RiskCounts;
-}
-
-export async function extractJsonFromBarChart(imagePath: string): Promise<BarChartJson> {
-    const apiUrl = 'http://127.0.0.1:5000/extract-json-from-horizontal-bar-chart';
-    try {
-        const fileBuffer = fs.readFileSync(imagePath); // Legge il file come buffer
-        const formData = new FormData();
-        formData.append('image', fileBuffer, { filename: 'chart.png' }); // Aggiunge il file al payload
-
-        const response = await axios.post(apiUrl, formData, {
-            headers: formData.getHeaders(), // Imposta gli header corretti
-        });
-
-        return response.data;
-    } catch (error) {
-        console.error('Error calling the API:', error);
-        throw error;
-    }
-}
-
-export function compareJsons(json1: BarChartJson, json2: BarChartJson) {
-    for (const key in json1) {
-        if (json2[key]) {
-            for (const subKey in json1[key]) {
-                if (json2[key][subKey] !== undefined) {
-                    expect(
-                        json2[key][subKey] < json1[key][subKey],
-                        `${key} - ${subKey}: ${json2[key][subKey]} < ${json1[key][subKey]}`
-                    ).toBeTruthy();
-                }
-            }
-        }
-    }
-}
-
-export function equalsJsons(
-    oracle: BarChartJson,
-    effective: BarChartJson,
-    errorMessage: string
-) {
-    let assertions = 0;
-    let failures = 0;
-
-    for (const key in oracle) {
-        assertions++;
-        expect.soft(effective[key], `${key} ${errorMessage}`).toBeDefined();
-        if (effective[key]) {
-            for (const subKey in oracle[key]) {
-                assertions++;
-                expect.soft(effective[key][subKey], `${key}.${subKey} ${errorMessage}`).toBeDefined();
-                if (effective[key][subKey] !== undefined) {
-                    expect.soft(
-                        oracle[key][subKey] === effective[key][subKey],
-                        `${key} - ${subKey}: ${oracle[key][subKey]} = ${effective[key][subKey]}`
-                    ).toBeTruthy();
-                    if (oracle[key][subKey] !== effective[key][subKey]) failures++;
-                } else failures++;
-            }
-        } else failures++;
-    }
-
-    return { assertions, failures };
-}
+import { BarChartJson } from '../types';
 
 // Funzione per fare lo screenshot del canvas
 export async function screenshotCanvas(
@@ -132,16 +60,16 @@ export function generateFileName(
     baseName: string,
     from: number,
     to: number,
-    deficiencyType: VisionDeficiency
+    deficiencyType: VisionDeficiency | null = null
 ): string {
-    return `${baseName}-from=${from}-to=${to}-${deficiencyType}.png`;
+    return `${baseName}-from=${from}-to=${to}${deficiencyType === null ? "" : "-" + deficiencyType}.png`;
 }
 
 export function generateJsonFileName(
     baseName: string,
     from: number,
     to: number,
-    deficiencyType: VisionDeficiency
+    deficiencyType: VisionDeficiency | null = null
 ): string {
-    return `${baseName}-from=${from}-to=${to}-${deficiencyType}.json`;
+    return `${baseName}-from=${from}-to=${to}-${deficiencyType === null ? "" : "-" + deficiencyType}.json`;
 }

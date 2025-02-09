@@ -1,71 +1,19 @@
 import { test, expect, Page, TestInfo } from '@playwright/test';
 import { testNormalVision, testDeuteranopia, testProtanopia, testTritanopia, testVisionDeficiencyVersusNormalVision} from '../src/utils/visionDeficiencyUtils';
-import { BarChartJson, generateFileName, generateJsonFileName, equalsJsons } from '../src/utils/utils';
+import { generateFileName, generateJsonFileName } from '../src/utils/utils';
 import { VisionDeficiency } from '../src/enums/visionDeficiency';
+import { testCases } from '../src/testCases';
+import { BarChartJson, equalsJsons } from '../src/types';
+import { login } from '../src/utils/authUtils';
 
 const baseUrl = 'http://localhost:3000';
 
 const canvasSelector = '[data-zr-dom-id="zr_0"]'
 
-const testCases = {
-    'chart-3 - solaris - (2020-12-01 - 2021-09-05)': {
-        url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
-        oracle:
-    {
-        "Agust--in Maugus": {
-            "Low Risk": 2
-        },
-        "Ben Cumpton": {
-            "Low Risk": 80,
-            "Unverified High Risk": 2,
-            "Voided High Risk": 1
-        },
-        "Constantina Quintanar": {
-            "Low Risk": 104,
-            "Unverified High Risk": 22
-        },
-        "DeLgado": {
-            "Low Risk": 26
-        },
-        "Deanna Rosheck": {
-            "High Risk Confirmed": 5,
-            "Low Risk": 267,
-            "Preliminar High Risk": 3,
-            "Unverified High Risk": 4,
-            "Voided High Risk": 15
-        },
-        "Drake Ferguson": {
-            "High Risk Confirmed": 1,
-            "Low Risk": 17,
-            "Preliminar High Risk": 1,
-            "Unverified High Risk": 5
-        },
-        "Elsa Elias": {
-            "Low Risk": 45,
-            "Unverified High Risk": 1
-        },
-        "Estephanie Diaz": {
-            "Low Risk": 123,
-            "Voided High Risk": 5
-        },
-        "Felipe Kason": {
-            "Low Risk": 102,
-            "Voided High Risk": 4,
-            "Preliminar High Risk": 1,
-            "High Risk Confirmed": 1
-        },
-        "Ivania Torres": {
-            "Low Risk": 67
-        }
-    },
-        from: 1606777200000,
-        to: 1630792800000
-    }
-}
-
-test.beforeEach(async ({ page }, testInfo) => {
+test.beforeEach(async ({ page }) => {
     // await page.setViewportSize({ width: 1536, height: 825 });
 
+    /*
     await page.goto(baseUrl);
 
     await page.getByPlaceholder('email or username').click();
@@ -74,36 +22,10 @@ test.beforeEach(async ({ page }, testInfo) => {
     await page.getByPlaceholder('password').fill('admin');
     await page.getByLabel('Login button').click();
     await page.getByLabel('Skip change password button').click();
+    */
+   await login(page, baseUrl);
 });
 
-/*
-async function testVisionDeficiency(page: Page, testInfo: TestInfo, baseUrlChart: String, from: Number, to: Number, deficiencyType: VisionDeficiency) {
-    const canvasSelector = '[data-zr-dom-id="zr_0"]';
-    let outputFilePath = `chart-3-from=${from}-to=${to}-${deficiencyType}+test.png`;
-
-    await utils.captureScreenshotWithVisionDeficiency(page, canvasSelector, baseUrlChart + "&from=" + from + "&to=" + to, outputFilePath, deficiencyType);
-
-    const jsonDeficiency = await utils.extractJsonFromBarChart(outputFilePath);
-
-    utils.logImageAndJson(testInfo, outputFilePath, `api-response-from=${from}-to=${to}-${deficiencyType}.json`, jsonDeficiency);
-
-    return jsonDeficiency;
-}
-
-async function testProtanopia(page, testInfo, baseUrlChart, from, to) {
-    return await testVisionDeficiency(page, testInfo, baseUrlChart, from, to, VisionDeficiency.Protanopia);
-}
-
-async function testDeuteranopia(page, testInfo, baseUrlChart, from, to) {
-    return await testVisionDeficiency(page, testInfo, baseUrlChart, from, to, VisionDeficiency.Deuteranopia);
-}
-
-async function testTritanopia(page, testInfo, baseUrlChart, from, to) {
-    return await testVisionDeficiency(page, testInfo, baseUrlChart, from, to, VisionDeficiency.Tritanopia);
-}
-*/
-
-/*
 test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus protanopia', async ({ page }, testInfo) => {
     let from = 1606777200000, to = 1630792800000;
     const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
@@ -117,7 +39,6 @@ test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus prota
         generateJsonFileName('api-response', from, to, VisionDeficiency.Protanopia)
     );
 });
-
 
 test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus deuteranopia', async ({ page }, testInfo) => {
     let from = 1606777200000, to = 1630792800000;
@@ -210,15 +131,16 @@ test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision', async ({ p
 
     equalsJsons(oracle, jsonNormalVision, " in normal vision");
 });
-*/
 
 test.describe('Grafici - Test visivi', () => {
     Object.entries(testCases).forEach(([chartName, { url, oracle, from, to }]) => {
         let calculatedOracle: BarChartJson | null = oracle;
+        const baseUrlChart = baseUrl + url;
         
         test.beforeEach(async ({ page }) => {
+
             if (!oracle) {
-                const baseUrlChart = baseUrl + url;
+                console.log("compute oracle");
                 calculatedOracle = await testNormalVision(
                     page,
                     test.info(),
@@ -230,14 +152,15 @@ test.describe('Grafici - Test visivi', () => {
             }
         });
 
-        [VisionDeficiency.None, VisionDeficiency.Protanopia, VisionDeficiency.Deuteranopia, VisionDeficiency.Tritanopia].forEach(visionDeficiency => {
-            test(`${chartName} - ${visionDeficiency}`, async ({ page }) => {
-                const testInfo = test.info();
+        const visionDeficiencies = oracle
+            ? Object.values(VisionDeficiency).filter(vd => vd !== VisionDeficiency.None)
+            : Object.values(VisionDeficiency);
 
-                const baseUrlChart = baseUrl + url;
+        visionDeficiencies.forEach(visionDeficiency => {
+            test(`${chartName} - ${visionDeficiency}`, async ({ page }) => {
                 await testVisionDeficiencyVersusNormalVision(
                     page,
-                    testInfo,
+                    test.info(),
                     baseUrlChart,
                     canvasSelector,
                     generateFileName(chartName, from, to, visionDeficiency),

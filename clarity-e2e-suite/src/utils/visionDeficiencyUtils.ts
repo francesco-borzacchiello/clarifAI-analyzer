@@ -1,25 +1,9 @@
 import { Page, TestInfo } from '@playwright/test';
 import { VisionDeficiency } from '../enums/visionDeficiency';
-import { BarChartJson, captureScreenshotWithVisionDeficiency, extractJsonFromBarChart, logImageAndJson, equalsJsons, logJson} from './utils';
-import { expect } from './customAssertions';
-
-async function captureAndExtractJson(
-    page: Page, 
-    testInfo: TestInfo, 
-    baseUrlChart: string, 
-    canvasSelector: string, 
-    outputFilePath: string, 
-    jsonFilePath: string, 
-    deficiencyType: VisionDeficiency
-): Promise<BarChartJson> {
-    await captureScreenshotWithVisionDeficiency(page, canvasSelector, baseUrlChart, outputFilePath, deficiencyType);
-
-    const jsonDeficiency = await extractJsonFromBarChart(outputFilePath);
-
-    logImageAndJson(testInfo, outputFilePath, jsonFilePath, jsonDeficiency);
-
-    return jsonDeficiency;
-}
+import { logJson } from './utils';
+import { expect } from '../assertions/visionDeficiencyAssertions';
+import { BarChartJson } from '../types';
+import { captureAndExtractJsonForReadability } from './chartCaptureUtils';
 
 export async function testNormalVision(
     page: Page, 
@@ -29,7 +13,7 @@ export async function testNormalVision(
     outputFilePath: string, 
     jsonFilePath: string
 ): Promise<BarChartJson> {
-    return await captureAndExtractJson(
+    return await captureAndExtractJsonForReadability(
         page,
         testInfo,
         baseUrlChart,
@@ -50,7 +34,7 @@ export async function testVisionDeficiencyVersusNormalVision(
     deficiencyType: VisionDeficiency,
     oracle: BarChartJson | null = null
 ) {
-    const jsonDeficiency = await captureAndExtractJson(
+    const jsonDeficiency = await captureAndExtractJsonForReadability(
         page,
         testInfo,
         baseUrlChart,
@@ -73,22 +57,6 @@ export async function testVisionDeficiencyVersusNormalVision(
             "normal-vision-reference.json"
         ) : oracle
     ).isAccessibleWithVisionDeficiency(jsonDeficiency, ` in ${deficiencyType} vision`);
-
-    /*
-    equalsJsons(
-        !oracle
-        ? await testNormalVision(
-            page,
-            testInfo,
-            baseUrlChart,
-            canvasSelector,
-            "normal-vision-reference.png",
-            "normal-vision-reference.json"
-        ) : oracle,
-        jsonDeficiency,
-        ` in ${deficiencyType} vision`
-    );
-    */
 }
 
 export async function testProtanopia(
