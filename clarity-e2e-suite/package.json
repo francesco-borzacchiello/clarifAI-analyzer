@@ -1,0 +1,22 @@
+{
+  "name": "learning-phase",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.7.5"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "canvg": "^4.0.2",
+    "echarts": "^5.5.1",
+    "pixelmatch": "^6.0.0",
+    "pngjs": "^2.3.1"
+  },
+  "type": "module"
+}
