@@ -1,76 +1,63 @@
-import { test, expect, Page, TestInfo } from '@playwright/test';
+import { test } from '@playwright/test';
 import { testNormalVision, testDeuteranopia, testProtanopia, testTritanopia, testVisionDeficiencyVersusNormalVision} from '../src/utils/visionDeficiencyUtils';
-import { generateFileName, generateJsonFileName } from '../src/utils/utils';
+import { generateImageFileName, generateJsonFileName, generateUrlWithParams } from '../src/utils/utils';
 import { VisionDeficiency } from '../src/enums/visionDeficiency';
 import { testCases } from '../src/testCases';
 import { BarChartJson, equalsJsons } from '../src/types';
 import { login } from '../src/utils/authUtils';
-
-const baseUrl = 'http://localhost:3000';
-
-const canvasSelector = '[data-zr-dom-id="zr_0"]'
+import { BASE_URL, CANVAS_SELECTOR } from '../src/constants';
+import { debug } from 'console';
 
 test.beforeEach(async ({ page }) => {
     // await page.setViewportSize({ width: 1536, height: 825 });
-
-    /*
-    await page.goto(baseUrl);
-
-    await page.getByPlaceholder('email or username').click();
-    await page.getByPlaceholder('email or username').fill('admin');
-    await page.getByPlaceholder('password').click();
-    await page.getByPlaceholder('password').fill('admin');
-    await page.getByLabel('Login button').click();
-    await page.getByLabel('Skip change password button').click();
-    */
-   await login(page, baseUrl);
+   await login(page);
 });
 
 test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus protanopia', async ({ page }, testInfo) => {
     let from = 1606777200000, to = 1630792800000;
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
 
     await testProtanopia(
         page,
         testInfo,
         baseUrlChart,
-        canvasSelector,
-        generateFileName('chart-3', from, to, VisionDeficiency.Protanopia),
+        CANVAS_SELECTOR,
+        generateImageFileName('chart-3', from, to, VisionDeficiency.Protanopia),
         generateJsonFileName('api-response', from, to, VisionDeficiency.Protanopia)
     );
 });
 
 test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus deuteranopia', async ({ page }, testInfo) => {
     let from = 1606777200000, to = 1630792800000;
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
 
     await testDeuteranopia(
         page,
         testInfo,
         baseUrlChart,
-        canvasSelector,
-        generateFileName('chart-3', from, to, VisionDeficiency.Deuteranopia),
+        CANVAS_SELECTOR,
+        generateImageFileName('chart-3', from, to, VisionDeficiency.Deuteranopia),
         generateJsonFileName('api-response', from, to, VisionDeficiency.Deuteranopia)
     );
 });
 
 test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus tritanopia', async ({ page }, testInfo) => {
     let from = 1606777200000, to = 1630792800000;
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
 
     await testTritanopia(
         page,
         testInfo,
         baseUrlChart,
-        canvasSelector,
-        generateFileName('chart-3', from, to, VisionDeficiency.Tritanopia),
+        CANVAS_SELECTOR,
+        generateImageFileName('chart-3', from, to, VisionDeficiency.Tritanopia),
         generateJsonFileName('api-response', from, to, VisionDeficiency.Tritanopia)
     );
 });
 
 test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision', async ({ page }, testInfo) => {
     let from = 1606777200000, to = 1630792800000;
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + from + "&to=" + to;
 
     const oracle = {
         "Agust--in Maugus": {
@@ -124,50 +111,51 @@ test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision', async ({ p
         page,
         testInfo,
         baseUrlChart,
-        canvasSelector,
-        generateFileName('chart-3', from, to, VisionDeficiency.None),
+        CANVAS_SELECTOR,
+        generateImageFileName('chart-3', from, to, VisionDeficiency.None),
         generateJsonFileName('api-response', from, to, VisionDeficiency.None)
     );
 
     equalsJsons(oracle, jsonNormalVision, " in normal vision");
 });
 
-test.describe('Grafici - Test visivi', () => {
-    Object.entries(testCases).forEach(([chartName, { url, oracle, from, to }]) => {
-        let calculatedOracle: BarChartJson | null = oracle;
-        const baseUrlChart = baseUrl + url;
-        
-        test.beforeEach(async ({ page }) => {
+test.describe.parallel('Grafici - Test visivi', () => {
+    Object.entries(testCases).forEach(([name, { url, oracle, from, to }]) => {
+        let calculatedOracle: BarChartJson | null = oracle ?? null;;
+        let baseUrlChart = BASE_URL + url;
+        let visionDeficiencies = oracle
+            ? Object.values(VisionDeficiency)
+            : Object.values(VisionDeficiency).filter(vd => vd !== VisionDeficiency.None);
 
-            if (!oracle) {
-                console.log("compute oracle");
-                calculatedOracle = await testNormalVision(
-                    page,
-                    test.info(),
-                    baseUrlChart,
-                    canvasSelector,
-                    generateFileName(chartName, from, to, VisionDeficiency.None),
-                    generateJsonFileName('api-response', from, to, VisionDeficiency.None)
-                );
-            }
-        });
+        test.describe(name, () => {
+            visionDeficiencies.forEach(visionType => {
+                test(visionType, async ({ page }, testInfo) => {
+                    await test.step('Compute oracle if not provided', async () => {
+                        if (!oracle) {
+                            console.log("Compute oracle");
+                            calculatedOracle = await testNormalVision(
+                                page,
+                                testInfo,
+                                generateUrlWithParams(baseUrlChart, from, to),
+                                CANVAS_SELECTOR,
+                                generateImageFileName(name, from, to, VisionDeficiency.None)
+                            );
+                        }
+                    });
 
-        const visionDeficiencies = oracle
-            ? Object.values(VisionDeficiency).filter(vd => vd !== VisionDeficiency.None)
-            : Object.values(VisionDeficiency);
-
-        visionDeficiencies.forEach(visionDeficiency => {
-            test(`${chartName} - ${visionDeficiency}`, async ({ page }) => {
-                await testVisionDeficiencyVersusNormalVision(
-                    page,
-                    test.info(),
-                    baseUrlChart,
-                    canvasSelector,
-                    generateFileName(chartName, from, to, visionDeficiency),
-                    generateJsonFileName('api-response', from, to, visionDeficiency),
-                    visionDeficiency,
-                    calculatedOracle
-                );
+                    await test.step(`Test vision deficiency: ${visionType}`, async () => {
+                        await testVisionDeficiencyVersusNormalVision(
+                            page,
+                            testInfo,
+                            generateUrlWithParams(baseUrlChart, from, to),
+                            CANVAS_SELECTOR,
+                            generateImageFileName(name, from, to, visionType),
+                            generateJsonFileName('api-response', from, to, visionType),
+                            visionType,
+                            calculatedOracle
+                        );
+                    });
+                });                
             });
         });
     });
@@ -179,35 +167,5 @@ test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - get screenshot', async ({ 
 
 
     await utils.screenshotCanvas(page, '[data-zr-dom-id="zr_0"]', baseUrlChart, "chart2-coral-with-legend.png");
-});
-
-test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus protanopia - test', async ({ page }, testInfo) => {
-    const baseUrlChart = baseUrl + '/d/b1ccae45-b9cf-4be3-8cc7-121e8d5c89d0/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3-deficit-test?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
-    let from = 1606777200000, to = 1630792800000;
-
-    const jsonNormalVision = await testVisionDeficiency(page, testInfo, baseUrlChart, from, to, VisionDeficiency.None);
-    const jsonProtanopia = await testProtanopia(page, testInfo, baseUrlChart, from, to);
-
-    utils.equalsJsons(jsonNormalVision, jsonProtanopia, " in protanopia vision");
-});
-
-test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus deuteranopia - test', async ({ page }, testInfo) => {
-    const baseUrlChart = baseUrl + '/d/d90d4718-daef-45e5-9e61-ba9a91cf7d06/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3-deuteranopia?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
-    let from = 1606777200000, to = 1630792800000;
-
-    const jsonNormalVision = await testVisionDeficiency(page, testInfo, baseUrlChart, from, to, VisionDeficiency.None);
-    const jsonDeuteranopia = await testDeuteranopia(page, testInfo, baseUrlChart, from, to);
-
-    utils.equalsJsons(jsonNormalVision, jsonDeuteranopia, " in deuteranopia vision");
-});
-
-test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - normal vision versus tritanopia - test', async ({ page }, testInfo) => {
-    const baseUrlChart = baseUrl + '/d/b1ccae45-b9cf-4be3-8cc7-121e8d5c89d0/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3-deficit-test?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
-    let from = 1606777200000, to = 1630792800000;
-
-    const jsonNormalVision = await testVisionDeficiency(page, testInfo, baseUrlChart, from, to, VisionDeficiency.None);
-    const jsonTritanopia = await testTritanopia(page, testInfo, baseUrlChart, from, to);
-
-    utils.equalsJsons(jsonNormalVision, jsonTritanopia, " in tritanopia vision");
 });
 */

@@ -11,7 +11,7 @@ export async function testNormalVision(
     baseUrlChart: string, 
     canvasSelector: string, 
     outputFilePath: string, 
-    jsonFilePath: string
+    jsonFilePath: string | null = null
 ): Promise<BarChartJson> {
     return await captureAndExtractJsonForReadability(
         page,

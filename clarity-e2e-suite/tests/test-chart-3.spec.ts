@@ -1,39 +1,44 @@
 import { test, Page } from '@playwright/test';
 import { login } from '../src/utils/authUtils';
 import { compareChartsForIntervals } from '../src/chartComparison';
-import { captureAndExtractJsonForFunctionalTesting, captureAndExtractJsonForInterval } from '../src/utils/chartCaptureUtils';
+import { captureAndExtractJsonForInterval } from '../src/utils/chartCaptureUtils';
 import { expect } from '../src/assertions/functionalAssertions';
-
-const baseUrl = 'http://localhost:3000'
+import { BASE_URL, CANVAS_SELECTOR } from '../src/constants';
+import { intervalPairs } from '../src/testCases';
 
 test.beforeEach(async ({ page }) => {
     // Esegui la login con il valore corrente di baseUrlChart
-    await login(page, baseUrl);
-
-    /*
-    await page.goto(baseUrl);
-    await page.getByPlaceholder('email or username').click();
-    await page.getByPlaceholder('email or username').fill('admin');
-    await page.getByPlaceholder('password').click();
-    await page.getByPlaceholder('password').fill('admin');
-    await page.getByLabel('Login button').click();
-    await page.getByLabel('Skip change password button').click();
-    */
+    await login(page);
 });
 
-test('chart-3 - solaris - (2020-12-01 - 2021-02-01) < (2020-12-01 - 2021-02-15)', async ({ page }, testInfo) => {
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db'
+test('chart-3 - solaris - |2020-12-01 - 2021-02-01| < |2020-12-01 - 2021-02-15|', async ({ page }, testInfo) => {
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db'
     
-    const canvasSelector = '[data-zr-dom-id="zr_0"]';
-
     await compareChartsForIntervals(
         page,
         testInfo,
         baseUrlChart,
-        canvasSelector,
+        CANVAS_SELECTOR,
         { from: 1606777200000, to: 1613343600000 },
         { from: 1606777200000, to: 1612134000000 }
     );
+});
+
+test.describe('Confronto tra grafici con intervalli diversi', () => {
+    Object.entries(intervalPairs).forEach(([testName, { url, largerInterval, smallerInterval }]) => {
+        test(testName, async ({ page }, testInfo) => {
+            const baseUrlChart = BASE_URL + url;
+
+            await compareChartsForIntervals(
+                page,
+                testInfo,
+                baseUrlChart,
+                CANVAS_SELECTOR,
+                largerInterval,
+                smallerInterval
+            );
+        });
+    });
 });
 
 /*
@@ -82,15 +87,13 @@ test('chart-3 - solaris - (2020-12-01 - 2021-02-01) < (2020-12-01 - 2021-02-15)'
 */
 
 test('chart-3 - solaris - (2020-12-01 - 2021-02-01) - Functional checks', async ({ page }, testInfo) => {
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db'
-    
-    const canvasSelector = '[data-zr-dom-id="zr_0"]';
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db'
 
     const chartDescription = await captureAndExtractJsonForInterval(
             page,
             testInfo,
             baseUrlChart,
-            canvasSelector,
+            CANVAS_SELECTOR,
             1606777200000,
             1613343600000,
         );

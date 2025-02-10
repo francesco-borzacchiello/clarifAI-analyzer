@@ -39,14 +39,16 @@ export async function captureScreenshotWithVisionDeficiency(
 export function logImageAndJson(
     testInfo: TestInfo,
     imagePath: string,
-    fileNameJson: string,
+    fileNameJson: string | null,
     json: BarChartJson
 ) {
     testInfo.attach(imagePath, {
         path: imagePath,
         contentType: 'image/png',
     });
-    logJson(testInfo, fileNameJson, json);
+
+    if (fileNameJson)
+        logJson(testInfo, fileNameJson, json);
 }
 
 export function logJson(testInfo: TestInfo, fileNameJson: string, json: BarChartJson) {
@@ -56,20 +58,42 @@ export function logJson(testInfo: TestInfo, fileNameJson: string, json: BarChart
     });
 }
 
-export function generateFileName(
+export function generateStringWithOptionalParts(
     baseName: string,
-    from: number,
-    to: number,
+    from: number | null = null,
+    to: number | null = null,
+    deficiencyType: VisionDeficiency | null = null,
+    extension: string | null = null,
+    delimiter: string = '-'
+): string {
+    const fromToPart = from !== null && to !== null ? `${delimiter}from=${from}${delimiter}to=${to}` : '';
+    const deficiencyPart = deficiencyType !== null ? `${delimiter}${deficiencyType}` : '';
+    const extensionPart = extension !== null ? `.${extension}` : '';
+    return `${baseName}${fromToPart}${deficiencyPart}${extensionPart}`;
+}
+
+export function generateImageFileName(
+    baseName: string,
+    from: number | null = null,
+    to: number | null = null,
     deficiencyType: VisionDeficiency | null = null
 ): string {
-    return `${baseName}-from=${from}-to=${to}${deficiencyType === null ? "" : "-" + deficiencyType}.png`;
+    return generateStringWithOptionalParts(baseName, from, to, deficiencyType, 'png');
 }
 
 export function generateJsonFileName(
     baseName: string,
-    from: number,
-    to: number,
+    from: number | null = null,
+    to: number | null = null,
     deficiencyType: VisionDeficiency | null = null
 ): string {
-    return `${baseName}-from=${from}-to=${to}-${deficiencyType === null ? "" : "-" + deficiencyType}.json`;
+    return generateStringWithOptionalParts(baseName, from, to, deficiencyType, 'json');
+}
+
+export function generateUrlWithParams(
+    baseUrl: string,
+    from: number | null = null,
+    to: number | null = null
+): string {
+    return generateStringWithOptionalParts(baseUrl, from, to, null, null, '&');
 }

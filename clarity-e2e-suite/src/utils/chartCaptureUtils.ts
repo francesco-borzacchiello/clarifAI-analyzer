@@ -1,7 +1,7 @@
 import { Page, TestInfo } from "@playwright/test";
 import { VisionDeficiency } from "../enums/visionDeficiency";
 import { BarChartJson } from "../types";
-import { captureScreenshotWithVisionDeficiency, generateFileName, generateJsonFileName, logImageAndJson } from "./utils";
+import { captureScreenshotWithVisionDeficiency, generateImageFileName, generateJsonFileName, logImageAndJson } from "./utils";
 import { extractJsonForFunctionalTesting, extractJsonForReadability } from "../chartProcessor";
 
 async function captureAndExtractJson(
@@ -10,7 +10,7 @@ async function captureAndExtractJson(
     baseUrlChart: string, 
     canvasSelector: string, 
     outputFilePath: string, 
-    jsonFilePath: string, 
+    jsonFilePath: string | null = null, 
     deficiencyType: VisionDeficiency,
     extractorType: 'readability' | 'functional'
 ): Promise<BarChartJson> {
@@ -31,7 +31,7 @@ export async function captureAndExtractJsonForReadability(
     baseUrlChart: string,
     canvasSelector: string,
     outputFilePath: string,
-    jsonFilePath: string,
+    jsonFilePath: string | null = null,
     deficiencyType: VisionDeficiency
 ): Promise<BarChartJson> {
     return captureAndExtractJson(
@@ -79,7 +79,7 @@ export async function captureAndExtractJsonForInterval(
         testInfo,
         `${baseUrlChart}&from=${from}&to=${to}`,
         canvasSelector,
-        generateFileName('chart', from, to),
+        generateImageFileName('chart', from, to),
         generateJsonFileName('api-response', from, to)
     );
 }
