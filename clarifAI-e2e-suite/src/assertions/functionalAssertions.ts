@@ -1,0 +1,99 @@
+import { test, expect as baseExpect } from '@playwright/test';
+import { BarChartJson } from '../types';
+
+export const expect = baseExpect.extend({
+  async containsTheInterval(
+    largerIntervalChart: BarChartJson,
+    smallerIntervalChart: BarChartJson
+  ) {
+
+    const { assertions, failures } = compareChartIntervals(largerIntervalChart, smallerIntervalChart);
+    const percentage = (failures / assertions) * 100;
+    let containmentMessage = 'not contained';
+    if (percentage === 0) containmentMessage = 'fully contained';
+    else if (percentage <= 50) containmentMessage = 'partially contained';
+
+    let resultMessage = `The smaller interval chart is ${containmentMessage} within the larger interval chart. Assertions: ${assertions}, Failures: ${failures}, Percentage: ${percentage.toFixed(2)}%`;
+
+    test.info().annotations.push({
+      type: "interval-containment-check",
+      description: resultMessage
+    });
+
+    return {
+      pass: percentage === 0,
+      message: () => resultMessage
+    };
+  },
+
+  async hasLabel(
+    chart: BarChartJson,
+    labelOracle: string
+  ) {
+    const personExists = chart.hasOwnProperty(labelOracle);
+    console.log(personExists);
+
+    return {
+      pass: personExists,
+      message: () => personExists
+        ? `Expected chart not to have person ${labelOracle}`
+        : `Expected chart to have person ${labelOracle}`
+    };
+  },
+
+  async hasCategory(
+    chart: BarChartJson,
+    labelOracle: string,
+    categoryOracle: string
+  ) {
+    const personExists = chart.hasOwnProperty(labelOracle);
+    const riskCategoryExists = personExists && chart[labelOracle].hasOwnProperty(categoryOracle);
+    return {
+      pass: riskCategoryExists,
+      message: () => riskCategoryExists
+        ? `Expected ${labelOracle} not to have risk category ${categoryOracle}`
+        : `Expected ${labelOracle} to have risk category ${categoryOracle}`
+    };
+  },
+
+  async hasCategoryValue(
+    chart: BarChartJson,
+    labelOracle: string,
+    categoryOracle: string,
+    valueOracle: number
+  ) {
+    const personExists = chart.hasOwnProperty(labelOracle);
+    const riskCategoryExists = personExists && chart[labelOracle].hasOwnProperty(categoryOracle);
+    const valueMatches = riskCategoryExists && chart[labelOracle][categoryOracle] === valueOracle;
+    baseExpect(valueMatches, `Expected ${labelOracle} to have risk category ${categoryOracle} with value ${valueOracle}`).toBeDefined();
+    
+    return {
+      pass: valueMatches,
+      message: () => valueMatches
+        ? `Expected ${labelOracle} not to have category ${categoryOracle} with value ${valueOracle}`
+        : `Expected ${labelOracle} to have category ${categoryOracle} with value ${valueOracle}`
+    };
+  }
+});
+
+export function compareChartIntervals(
+    largerIntervalChart: BarChartJson,
+    smallerIntervalChart: BarChartJson
+) {
+    let assertions = 0;
+    let failures = 0;
+
+    for (const key in largerIntervalChart)
+        if (smallerIntervalChart[key])
+            for (const subKey in largerIntervalChart[key])
+                if (smallerIntervalChart[key][subKey] !== undefined) {
+                    assertions++;
+                    baseExpect.soft(
+                        smallerIntervalChart[key][subKey] <= largerIntervalChart[key][subKey],
+                        `${key} - ${subKey}: ${smallerIntervalChart[key][subKey]} < ${largerIntervalChart[key][subKey]}`
+                    ).toBeTruthy();
+                    if (smallerIntervalChart[key][subKey] > largerIntervalChart[key][subKey]) failures++;
+                }
+
+    return { assertions, failures };
+}
