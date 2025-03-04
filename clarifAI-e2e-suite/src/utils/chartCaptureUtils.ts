@@ -57,10 +57,13 @@ async function captureScreenshotWithVisionDeficiency(
     deficiency: VisionDeficiency,
     milllisecondsToWait: number = 4000
 ): Promise<Buffer> {
-    const client = await page.context().newCDPSession(page);
-    await client.send("Emulation.setEmulatedVisionDeficiency", {
-        type: deficiency
-    });
+    const browserName = page.context().browser()?.browserType().name();
+    if (browserName === 'chromium') {
+        const client = await page.context().newCDPSession(page);
+        await client.send("Emulation.setEmulatedVisionDeficiency", {
+            type: deficiency
+        });
+    }
     return await screenshotCanvas(page, outputFilePath, canvasSelector, url, milllisecondsToWait);
 }
 

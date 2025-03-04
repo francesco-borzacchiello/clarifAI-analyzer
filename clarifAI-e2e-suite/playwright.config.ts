@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const screenWidth = 1536;
+const screenHeight = 828;
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -31,50 +34,42 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    viewport: null,
-    launchOptions: {
-      args: ["--start-maximized"]
-    },
   },
   timeout: 90_000,
 
   /* Configure projects for major browsers */
   projects: [
-    /*
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    }
-    */
-
     {
       name: 'chromium',
       use: { 
-        viewport: null
+        // ...devices['Desktop Chrome'],
+        viewport: null,
+        launchOptions: {
+          args: ["--start-maximized"]
+        },
       },
     },
     
     {
       name: 'firefox',
       use: {
-        viewport: null
+        ...devices['Desktop Firefox'],
+        viewport: {
+          width: screenWidth,
+          height: screenHeight,
+        },
+        deviceScaleFactor: 2
       },
     },
 
     {
       name: 'webkit',
       use: {
-        viewport: null
+        ...devices['Desktop Safari'],
+        viewport: {
+          width: screenWidth,
+          height: screenHeight,
+        }
       },
     }
 

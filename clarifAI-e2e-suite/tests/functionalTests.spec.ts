@@ -85,9 +85,9 @@ test.describe.parallel('Confronto tra grafici con intervalli diversi', () => {
 }
 
 */
-
-test('chart-3 - solaris - (2020-11-30 - 2021-02-15) - Functional checks', async ({ page }, testInfo) => {
-    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db'
+test.describe.serial('', () => {
+test.only('Chart with legend and integer values - (2020-11-30 - 2021-02-15) - Functional checks', async ({ page }, testInfo) => {
+    const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
 
     const chartDescription = await captureAndExtractJsonForInterval(
             page,
@@ -101,5 +101,22 @@ test('chart-3 - solaris - (2020-11-30 - 2021-02-15) - Functional checks', async 
     await expect.soft(chartDescription).hasLabel("Constantina Quintanar");    
     await expect.soft(chartDescription).hasLabel("Luis Segura");
     await expect.soft(chartDescription).hasCategory("Jacob Capurro", "High Risk Confirmed");
-    await expect.soft(chartDescription).hasCategoryValue("Jason Pagan", "Voided High Risk", 2);
+    await expect.soft(chartDescription).hasCategoryValue("Jason Pagan", 2, "Voided High Risk");
+    await expect.soft(chartDescription).hasCategoryValue("Elsa Elias", 12, "Low Risk");
+});
+
+test.only('Chart with one category and integer values - (2020-11-30 - 2021-02-15) - Functional checks', async ({ page }, testInfo) => {
+  const baseUrlChart = BASE_URL + '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
+
+  const chartDescription = await captureAndExtractJsonForInterval(
+          page,
+          testInfo,
+          baseUrlChart,
+          CANVAS_SELECTOR,
+          "2020-11-30",
+          "2021-02-15"
+      );
+
+  await expect.soft(chartDescription).hasCategoryValue("Elsa Elias", 12);
+});
 });

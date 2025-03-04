@@ -58,8 +58,8 @@ export const expect = baseExpect.extend({
   async hasCategoryValue(
     chart: BarChartJson,
     labelOracle: string,
-    categoryOracle: string,
-    valueOracle: number
+    valueOracle: number,
+    categoryOracle: string = "value"
   ) {
     const labelExists = chart.hasOwnProperty(labelOracle);
     const categoryExists = labelExists && chart[labelOracle].hasOwnProperty(categoryOracle);
