@@ -344,7 +344,7 @@ class InitialValueExtractor(ValueExtractor):
                             'legend_item': text,
                             'value': int(extracted_text) if extracted_text.isdigit() else extracted_text
                         })
-                    else:
+                    elif not any(item['label'] == label_text and item['legend_item'] == legend['text'] for item in results):
                         results.append({
                             'label': label_text,
                             'legend_item': text,

@@ -1,7 +1,7 @@
 export enum VisionDeficiency {
     None = "none",
-    Achromatopsia = "achromatopsia",
-    BlurredVision = "blurredVision",
+    // Achromatopsia = "achromatopsia",
+    // BlurredVision = "blurredVision",
     Deuteranopia = "deuteranopia",
     Protanopia = "protanopia",
     Tritanopia = "tritanopia"

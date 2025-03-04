@@ -25,7 +25,7 @@ test('chart-3 - solaris - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|
 });
 
 test.describe.parallel('Confronto tra grafici con intervalli diversi', () => {
-    Object.entries(intervalPairs).forEach(([testName, { url, largerInterval, smallerInterval }]) => {
+    Object.entries(intervalPairs).forEach(([testName, { url, selector, largerInterval, smallerInterval }]) => {
         test(testName, async ({ page }, testInfo) => {
             const baseUrlChart = BASE_URL + url;
 
@@ -33,7 +33,7 @@ test.describe.parallel('Confronto tra grafici con intervalli diversi', () => {
                 page,
                 testInfo,
                 baseUrlChart,
-                CANVAS_SELECTOR,
+                selector,
                 largerInterval,
                 smallerInterval
             );
@@ -103,33 +103,3 @@ test('chart-3 - solaris - (2020-11-30 - 2021-02-15) - Functional checks', async 
     await expect.soft(chartDescription).hasCategory("Jacob Capurro", "High Risk Confirmed");
     await expect.soft(chartDescription).hasCategoryValue("Jason Pagan", "Voided High Risk", 2);
 });
-
-/*
-test('chart-3 - solaris - ', async ({ page }, testInfo) => {
-    // from: 2020-12-01 00:00:00, to: 2021-09-05 00:00:00
-    const baseUrlChart = baseUrl + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db'
-    let from = 1606777200000, to = 1630792800000;
-
-    const canvasSelector = '[data-zr-dom-id="zr_0"]';
-    let outputFilePath = `chart-3-from=${from}-to=${to}.png`;
-  
-    await utils.screenshotCanvas(page, canvasSelector, baseUrlChart + "&from="+ from + "&to=" + to, outputFilePath);
-
-    const jsonLargeIntervall = await utils.extractJsonFromBarChart(outputFilePath);
-
-    utils.logImageAndJson(testInfo, outputFilePath, `api-response-from=${from}-to=${to}.json`, jsonLargeIntervall);
-
-    // to: 2021-02-01 00:00:00
-    to = 1612134000000;
-
-    outputFilePath = "chart-3-"+ "from="+ from + "-to=" + to + ".png";
-    
-    await utils.screenshotCanvas(page, canvasSelector, baseUrlChart + "&from="+ from + "&to=" + to, outputFilePath);  
-    
-    const jsonSmallIntervall = await utils.extractJsonFromBarChart(outputFilePath);
-
-    utils.logImageAndJson(testInfo, outputFilePath, `api-response-from=${from}-to=${to}.json`, jsonSmallIntervall);
-
-    utils.compareJsons(jsonSmallIntervall, jsonLargeIntervall);
-});
-*/

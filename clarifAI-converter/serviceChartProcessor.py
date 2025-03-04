@@ -35,8 +35,10 @@ def image_to_json(image_bytes, whitelist = ChartProcessorConfig.INTEGER, value_e
 
 if __name__ == "__main__":
     #with open("test-images/app-1/canvas-screenshot.png", "rb") as img_file:
-
-    with open("C:\\Users\\fborz\\OneDrive - Università di Napoli Federico II\\Tesi Magistrale\\Esperimenti\\Playwright\\learning-phase\\chart-3-from=1606777200000-to=1630792800000-none+test.png", "rb") as img_file:
+    #relative_path = os.path.join("test-images", "app-1", "achromatopsia.png")
+    #with open(relative_path, "rb") as img_file:
+    with open("test-images/app-1/achromatopsia.png", "rb") as img_file:
+    # with open("C:\\Users\\fborz\\OneDrive - Università di Napoli Federico II\\Tesi Magistrale\\Esperimenti\\Playwright\\learning-phase\\chart-3-from=1606777200000-to=1630792800000-none+test.png", "rb") as img_file:
     # with open("C:\\Users\\fborz\\OneDrive - Università di Napoli Federico II\\Tesi Magistrale\\Esperimenti\\Playwright\\learning-phase\\chart-3-from=1606777200000-to=1630792800000-1920x1080.png", "rb") as img_file:
         image_bytes = img_file.read()
     result = image_to_json(image_bytes, ChartProcessorConfig.INTEGER, 'default', 'eng')

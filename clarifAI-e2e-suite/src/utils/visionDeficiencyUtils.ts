@@ -1,28 +1,10 @@
-import { Page, TestInfo } from '@playwright/test';
+import test, { Page, TestInfo } from '@playwright/test';
 import { VisionDeficiency } from '../enums/visionDeficiency';
 import { logJson } from './utils';
 import { expect } from '../assertions/visionDeficiencyAssertions';
 import { BarChartJson } from '../types';
 import { captureAndExtractJsonForReadability } from './chartCaptureUtils';
-
-export async function testNormalVision(
-    page: Page, 
-    testInfo: TestInfo, 
-    baseUrlChart: string, 
-    canvasSelector: string, 
-    outputFilePath: string, 
-    jsonFilePath: string | null = null
-): Promise<BarChartJson> {
-    return await captureAndExtractJsonForReadability(
-        page,
-        testInfo,
-        baseUrlChart,
-        canvasSelector,
-        outputFilePath,
-        jsonFilePath,
-        VisionDeficiency.None
-    );
-}
+import { getNormalVisionReference } from './readabilityUtils';
 
 export async function testVisionDeficiencyVersusNormalVision(
     page: Page, 
@@ -34,29 +16,33 @@ export async function testVisionDeficiencyVersusNormalVision(
     deficiencyType: VisionDeficiency,
     oracle: BarChartJson | null = null
 ) {
-    const jsonDeficiency = await captureAndExtractJsonForReadability(
-        page,
-        testInfo,
-        baseUrlChart,
-        canvasSelector,
-        outputFilePath,
-        jsonFilePath,
-        deficiencyType
-    );
+    if (oracle) logJson(testInfo, "oracle.json", oracle)
+        else await test.step('Compute oracle using normal vision as a reference', async () => {
+            oracle = await getNormalVisionReference(
+                page,
+                testInfo,
+                baseUrlChart,
+                canvasSelector,
+                "normal-vision-reference.png",
+                "normal-vision-reference.json")
+            });
 
-    if (oracle) logJson(testInfo, "oracle.json", oracle);
-
-    await expect(
-        !oracle
-        ? await testNormalVision(
+    await test.step(`Test vision deficiency: ${deficiencyType}`, async () => {
+        const jsonDeficiency = await captureAndExtractJsonForReadability(
             page,
             testInfo,
             baseUrlChart,
             canvasSelector,
-            "normal-vision-reference.png",
-            "normal-vision-reference.json"
-        ) : oracle
-    ).isAccessibleWithVisionDeficiency(jsonDeficiency, ` in ${deficiencyType} vision`);
+            outputFilePath,
+            jsonFilePath,
+            deficiencyType
+        );
+        
+        if (oracle)
+            await expect(oracle)
+                .isAccessibleWithVisionDeficiency(jsonDeficiency, ` in ${deficiencyType} vision`);
+        else throw new Error("Oracle could not be computed or retrieved.");
+    });
 }
 
 export async function testProtanopia(

@@ -30,14 +30,13 @@ export const expect = baseExpect.extend({
     chart: BarChartJson,
     labelOracle: string
   ) {
-    const personExists = chart.hasOwnProperty(labelOracle);
-    console.log(personExists);
+    const labelExists = chart.hasOwnProperty(labelOracle);
 
     return {
-      pass: personExists,
-      message: () => personExists
-        ? `Expected chart not to have person ${labelOracle}`
-        : `Expected chart to have person ${labelOracle}`
+      pass: labelExists,
+      message: () => labelExists
+        ? `Expected chart not to have label ${labelOracle}`
+        : `Expected chart to have label ${labelOracle}`
     };
   },
 
@@ -46,13 +45,13 @@ export const expect = baseExpect.extend({
     labelOracle: string,
     categoryOracle: string
   ) {
-    const personExists = chart.hasOwnProperty(labelOracle);
-    const riskCategoryExists = personExists && chart[labelOracle].hasOwnProperty(categoryOracle);
+    const labelExists = chart.hasOwnProperty(labelOracle);
+    const categoryExists = labelExists && chart[labelOracle].hasOwnProperty(categoryOracle);
     return {
-      pass: riskCategoryExists,
-      message: () => riskCategoryExists
-        ? `Expected ${labelOracle} not to have risk category ${categoryOracle}`
-        : `Expected ${labelOracle} to have risk category ${categoryOracle}`
+      pass: categoryExists,
+      message: () => categoryExists
+        ? `Expected ${labelOracle} not to have category ${categoryOracle}`
+        : `Expected ${labelOracle} to have category ${categoryOracle}`
     };
   },
 
@@ -62,10 +61,10 @@ export const expect = baseExpect.extend({
     categoryOracle: string,
     valueOracle: number
   ) {
-    const personExists = chart.hasOwnProperty(labelOracle);
-    const riskCategoryExists = personExists && chart[labelOracle].hasOwnProperty(categoryOracle);
-    const valueMatches = riskCategoryExists && chart[labelOracle][categoryOracle] === valueOracle;
-    baseExpect(valueMatches, `Expected ${labelOracle} to have risk category ${categoryOracle} with value ${valueOracle}`).toBeDefined();
+    const labelExists = chart.hasOwnProperty(labelOracle);
+    const categoryExists = labelExists && chart[labelOracle].hasOwnProperty(categoryOracle);
+    const valueMatches = categoryExists && chart[labelOracle][categoryOracle] === valueOracle;
+    baseExpect(valueMatches, `Expected ${labelOracle} to have category ${categoryOracle} with value ${valueOracle}`).toBeDefined();
     
     return {
       pass: valueMatches,
@@ -76,7 +75,7 @@ export const expect = baseExpect.extend({
   }
 });
 
-export function compareChartIntervals(
+function compareChartIntervals(
     largerIntervalChart: BarChartJson,
     smallerIntervalChart: BarChartJson
 ) {

@@ -1,3 +1,4 @@
+import { CANVAS_SELECTOR, SVG_SELECTOR } from "./constants";
 import { BarChartJson } from "./types";
 
 export interface UnFunctionalTestCase {
@@ -7,8 +8,15 @@ export interface UnFunctionalTestCase {
     to: string;
 }
 
+export interface IntervalTestCase {
+    url: string;
+    largerInterval: { from: string; to: string };
+    smallerInterval: { from: string; to: string };
+    selector: string;
+}
+
 export const testCases: { [key: string]: UnFunctionalTestCase } = {
-    'chart-3 - solaris - (2020-12-01 - 2021-09-05) - with oracle': {
+    'Chart with legend and integer values - (2020-12-01 - 2021-09-05) - with oracle': {
         url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
         oracle:{
             "Agust--in Maugus": {
@@ -60,37 +68,70 @@ export const testCases: { [key: string]: UnFunctionalTestCase } = {
         from: "2020-12-01",
         to: "2021-09-05"
     },
-    'chart-3 - solaris - (2020-12-01 - 2021-02-15)' : {
+    'Chart with legend and integer values - (2020-12-01 - 2021-02-15)' : {
         url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
         from: "2020-12-01",
         to: "2021-02-15"
     },
-    'chart-3 - solaris - (2020-02-01 - 2021-03-01)' : {
+    'Chart with legend and integer values - (2020-02-01 - 2021-03-01)' : {
         url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
         from: "2020-02-01",
         to: "2021-03-01"
-    }
+    },
+    'Chart with one category and integer values - (2020-12-01 - 2021-09-05)': {
+        url: '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        from: "2020-12-01",
+        to: "2021-09-05"
+    },
 }
 
-export const intervalPairs = {
-    'chart-3 - solaris - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|': {
+export const intervalPairs: { [key: string]: IntervalTestCase } = {
+    'Chart with legend and integer values - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|': {
         url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: CANVAS_SELECTOR,
         largerInterval: { from: "2020-12-01", to: "2021-02-15" },
         smallerInterval: { from: "2020-12-01", to: "2021-02-01" }
     },
-    'chart-3 - solaris - |2021-02-15 - 2021-03-01| <= |2021-02-01 - 2021-03-01|': {
+    'Chart with legend and integer values - |2021-02-15 - 2021-03-01| <= |2021-02-01 - 2021-03-01|': {
         url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: CANVAS_SELECTOR,
         largerInterval: { from: "2021-02-01", to: "2021-03-01" },
         smallerInterval: { from: "2021-02-15", to: "2021-03-01" }
     },
-    'chart-1 - solaris - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|': {
+    'Chart with one category and integer values - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|': {
         url: '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: CANVAS_SELECTOR,
         largerInterval: { from: "2020-12-01", to: "2021-02-15" },
         smallerInterval: { from: "2020-12-01", to: "2021-02-01" }
     },
-    'chart-1 - solaris - |2021-02-15 - 2021-03-01| <= |2021-02-01 - 2021-03-01|': {
+    'Chart with one category and integer values - |2021-02-15 - 2021-03-01| <= |2021-02-01 - 2021-03-01|': {
         url: '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: CANVAS_SELECTOR,
         largerInterval: { from: "2021-02-01", to: "2021-03-01" },
         smallerInterval: { from: "2021-02-15", to: "2021-03-01" }
     },
+    'SVG Chart with legend and integer values - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|': {
+        url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: SVG_SELECTOR,
+        largerInterval: { from: "2020-12-01", to: "2021-02-15" },
+        smallerInterval: { from: "2020-12-01", to: "2021-02-01" }
+    },
+    'SVG Chart with legend and integer values - |2021-02-15 - 2021-03-01| <= |2021-02-01 - 2021-03-01|': {
+        url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: SVG_SELECTOR,
+        largerInterval: { from: "2021-02-01", to: "2021-03-01" },
+        smallerInterval: { from: "2021-02-15", to: "2021-03-01" }
+    },
+    'SVG Chart with one category and integer values - |2020-12-01 - 2021-02-01| <= |2020-12-01 - 2021-02-15|': {
+        url: '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: SVG_SELECTOR,
+        largerInterval: { from: "2020-12-01", to: "2021-02-15" },
+        smallerInterval: { from: "2020-12-01", to: "2021-02-01" }
+    },
+    'SVG Chart with one category and integer values - |2021-02-15 - 2021-03-01| <= |2021-02-01 - 2021-03-01|': {
+        url: '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
+        selector: SVG_SELECTOR,
+        largerInterval: { from: "2021-02-01", to: "2021-03-01" },
+        smallerInterval: { from: "2021-02-15", to: "2021-03-01" }
+    }
 };

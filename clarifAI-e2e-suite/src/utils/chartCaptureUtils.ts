@@ -3,6 +3,7 @@ import { VisionDeficiency } from "../enums/visionDeficiency";
 import { BarChartJson } from "../types";
 import { generateImageFileName, generateJsonFileName, logImageAndJson } from "./utils";
 import { extractJsonForFunctionalTesting, extractJsonForReadability } from "../chartProcessor";
+import { BASE_SCREENSHOT_PATH } from "../constants";
 
 async function captureAndExtractJson(
     page: Page, 
@@ -14,7 +15,7 @@ async function captureAndExtractJson(
     deficiencyType: VisionDeficiency,
     extractorType: 'readability' | 'functional'
 ): Promise<BarChartJson> {
-    const screenshotBuffer = await captureScreenshotWithVisionDeficiency(page, canvasSelector, baseUrlChart, deficiencyType);
+    const screenshotBuffer = await captureScreenshotWithVisionDeficiency(page, outputFilePath, canvasSelector, baseUrlChart, deficiencyType);
 
     const jsonDeficiency = extractorType === 'readability'
         ? await extractJsonForReadability(screenshotBuffer)
@@ -28,6 +29,7 @@ async function captureAndExtractJson(
 // Funzione per fare lo screenshot del canvas
 async function screenshotCanvas(
     page: Page,
+    outputFilePath: string,
     canvasSelector: string,
     url: string,
     milllisecondsToWait: number = 4000
@@ -37,15 +39,19 @@ async function screenshotCanvas(
     await page.waitForTimeout(milllisecondsToWait);
     const canvasElement = await page.waitForSelector(canvasSelector);
 
+    // Concatenare BASE_SCREENSHOT_PATH con outputFilePath se BASE_SCREENSHOT_PATH è valorizzata
+    const fullOutputFilePath = BASE_SCREENSHOT_PATH ? `${BASE_SCREENSHOT_PATH}/${outputFilePath}` : undefined;
+
     // Fare uno screenshot dell'elemento canvas
     // await canvasElement.screenshot({ path: outputFilePath });
     // console.log(`Screenshot del canvas salvato in: ${outputFilePath}`);
-    return await canvasElement.screenshot({ type: 'png' });
+    return await canvasElement.screenshot({ type: 'png', path: fullOutputFilePath });
 }
 
 // Funzione per catturare screenshot con diversi deficit visivi
 async function captureScreenshotWithVisionDeficiency(
     page: Page,
+    outputFilePath: string,
     canvasSelector: string,
     url: string,
     deficiency: VisionDeficiency,
@@ -55,7 +61,7 @@ async function captureScreenshotWithVisionDeficiency(
     await client.send("Emulation.setEmulatedVisionDeficiency", {
         type: deficiency
     });
-    return await screenshotCanvas(page, canvasSelector, url, milllisecondsToWait);
+    return await screenshotCanvas(page, outputFilePath, canvasSelector, url, milllisecondsToWait);
 }
 
 export async function captureAndExtractJsonForReadability(

@@ -1,1 +1,1 @@
-# clarity-analyzer
+# clarifAI-analyzer
