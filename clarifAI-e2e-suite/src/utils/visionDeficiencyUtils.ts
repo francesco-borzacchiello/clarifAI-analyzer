@@ -40,7 +40,7 @@ export async function testVisionDeficiencyVersusNormalVision(
         
         if (oracle)
             await expect(oracle)
-                .isAccessibleWithVisionDeficiency(jsonDeficiency, ` in ${deficiencyType} vision`);
+                .isAccessibleWithVisionDeficiency(jsonDeficiency, deficiencyType);
         else throw new Error("Oracle could not be computed or retrieved.");
     });
 }

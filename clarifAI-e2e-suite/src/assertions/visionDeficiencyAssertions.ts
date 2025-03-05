@@ -1,14 +1,15 @@
 import { test, expect as baseExpext } from '@playwright/test';
 import { BarChartJson } from '../types';
 import { equalsChartJsons } from '../utils/chartJsonComparisonUtils';
+import { VisionDeficiency } from '../enums/visionDeficiency';
 
 export const expect = baseExpext.extend({
   async isAccessibleWithVisionDeficiency(
     oracle: BarChartJson,
     effective: BarChartJson,
-    errorMessage: string
+    deficiencyType: VisionDeficiency
   ) {
-    const { assertions, failures, mismatchedItems, falsePositive } = equalsChartJsons(oracle, effective, errorMessage);
+    const { assertions, failures, mismatchedItems, falsePositive } = equalsChartJsons(oracle, effective, ` in ${deficiencyType} vision`);
     const percentage = (failures / assertions) * 100;
     
     let accessibilityMessage: string;
@@ -19,7 +20,7 @@ export const expect = baseExpext.extend({
     let resultMessagge = `The chart is ${accessibilityMessage}. Assertions: ${assertions}, Failures: ${failures}, Failure rate: ${percentage.toFixed(2)}%`;
 
     test.info().annotations.push({
-        type: "accessibility-check",
+        type: "Accessibility check",
         description: resultMessagge
     });
 
@@ -40,7 +41,7 @@ export const expect = baseExpext.extend({
           }).join('\n');
       
         test.info().annotations.push({
-          type: "Values of risk categories with readability problems",
+          type: `Values of risk categories with readability problems with ${deficiencyType} vision`,
           description: `${totalMismatchedElements} on ${totalCategoriesInOracle} (${((totalMismatchedElements / totalCategoriesInOracle) * 100).toFixed(2)}%), in detail:\n${mismatchedItemsList}`
         });
       }
@@ -60,7 +61,7 @@ export const expect = baseExpext.extend({
           }).join('\n');
         
         test.info().annotations.push({
-          type: "Unexpected Categories of Risk",
+          type: `Unexpected Categories of Risk with ${deficiencyType} vision`,
           description: `Altogether there are ${totalUnexpectedCategories} unexpected categories of risk, in detail:\n${falsePositiveList}`
         });
       }
