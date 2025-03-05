@@ -137,10 +137,21 @@ class DefaultLegendExtractor(LegendExtractor):
 
             # Determina l'area da cui estrarre il testo
             text_area = legend_area[y:y + h, x + w + 5:x + w + 5 + text_width]
-            text = pytesseract.image_to_string(text_area, config='--psm 6', lang=ChartProcessorConfig.lang).strip()
+            text_data = pytesseract.image_to_data(text_area, config='--psm 7', lang=ChartProcessorConfig.lang, output_type=pytesseract.Output.DICT)
+
+            # Filtra i risultati per ottenere solo quelli con una confidenza sufficiente
+            filtered_text_data = [
+                (text_data['text'][i], text_data['conf'][i])
+                for i in range(len(text_data['text']))
+                if text_data['conf'][i] > 60  # Soglia di confidenza
+            ]
+
+            # Unisci i testi filtrati in una singola stringa
+            text = ' '.join([text for text, conf in filtered_text_data]).strip()
 
             if text:
                 item['text'] = text
+                item['confidence'] = max([conf for text, conf in filtered_text_data])
 
         # Filtriamo eventuali rettangoli senza testo
         legend_items = [item for item in legend_items if 'text' in item]

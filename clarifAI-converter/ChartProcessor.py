@@ -89,10 +89,23 @@ class ChartProcessor:
                 'value': None
             })
 
+        # Step 7: Populate legend
+        legend = {}
+        for item in legend_items:
+            if 'text' in item and 'color' in item and 'confidence' in item:
+                b, g, r = item['color']
+                x, y, w, h = item['bounding_box']
+                legend[item['text']] = {
+                    'color': {'r': r, 'g': g, 'b': b},
+                    'confidence': item['confidence'] / 100,  # Convert confidence to a decimal
+                    'bounding_box': {'x': x, 'y': y, 'width': w, 'height': h}
+                }
+
         json_results = {
             'data': self.json_formatter.prepare_json(results),
-            'processed_image':self.__annotate_image(image, labels, contours, legend_items)
+            'processed_image': self.__annotate_image(image, labels, contours, legend_items),
+            'legend': legend
         }
-        # Step 7: Format JSON
+        # Step 8: Format JSON
         return json_results
 
