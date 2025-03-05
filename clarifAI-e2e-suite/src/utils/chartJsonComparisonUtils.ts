@@ -8,11 +8,13 @@ export function equalsChartJsons(
 ): {
     assertions: number,
     failures: number,
-    mismatchedItems: Map<string, Set<string>>
+    mismatchedItems: Map<string, Set<string>>,
+    falsePositive: BarChartJson
 } {
     let assertions = 0;
     let failures = 0;
     let mismatchedItems: Map<string, Set<string>> = new Map();
+    let falsePositive: BarChartJson = {};
 
     for (const label in oracle) {
         assertions++;
@@ -23,49 +25,57 @@ export function equalsChartJsons(
             failures += result.failures;
             if(result.mismatchedCategories.size > 0)
                 mismatchedItems.set(label, result.mismatchedCategories);
+            if(Object.keys(result.falsePositive).length > 0){
+                if (!falsePositive[label]) falsePositive[label] = {};
+                for (const category in result.falsePositive)
+                    falsePositive[label][category] = result.falsePositive[category];
+            }
         } else failures++;
     }
 
-    return { assertions, failures, mismatchedItems };
+    return { assertions, failures, mismatchedItems, falsePositive };
 }
 
 function equalsForASpecificItemOfChart(
     item : string,
     itemOracle: RiskCounts,
-    itemEffective: RiskCounts,
+    labelEffective: RiskCounts,
     errorMessage: string
 ): {
     assertions: number,
     failures: number,
     mismatchedCategories: Set<string>
+    falsePositive: RiskCounts
 } {
     let assertions = 0;
     let failures = 0;
     let mismatchedCategories: Set<string> = new Set();
+    let falsePositive: RiskCounts = {};
 
     for (const category in itemOracle) {
         assertions++;
-        baseExpext.soft(itemEffective[category], `${item}.${category} ${errorMessage}`).toBeDefined();
-        if (itemEffective[category] !== undefined) {
+        baseExpext.soft(labelEffective[category], `${item}.${category} ${errorMessage}`).toBeDefined();
+        if (labelEffective[category] !== undefined) {
             assertions++;
             baseExpext.soft(
-                itemOracle[category] === itemEffective[category],
-                `${item} - ${category}: ${itemOracle[category]} = ${itemEffective[category]}`
+                itemOracle[category] === labelEffective[category],
+                `${item} - ${category}: ${itemOracle[category]} = ${labelEffective[category]}`
             ).toBeTruthy();
-            if (itemOracle[category] !== itemEffective[category]) {
+            if (itemOracle[category] !== labelEffective[category]) {
                 failures++;
                 mismatchedCategories.add(category);
             }
         } else failures++;
     }
-    const oracleSubKeys = new Set(Object.keys(itemOracle));
-    const effectiveSubKeys = new Set(Object.keys(itemEffective));
+    const oracleCategories = new Set(Object.keys(itemOracle));
+    const effectiveCategories = new Set(Object.keys(labelEffective));
     // Calcolare l'insieme delle subkey che sono in effective ma non in oracle
-    const difference = [...effectiveSubKeys].filter(subKey => !oracleSubKeys.has(subKey));
-    for (const subKey of difference) {
+    const difference = [...effectiveCategories].filter(subKey => !oracleCategories.has(subKey));
+    for (const category of difference) {
         assertions++;
         failures++;
-        baseExpext.soft(itemEffective[subKey], `False Positive: ${item}.${subKey} ${errorMessage} but not in oracle`).not.toBeDefined();
+        baseExpext.soft(labelEffective[category], `False Positive: ${item}.${category} ${errorMessage} but not in oracle`).not.toBeDefined();
+        falsePositive[category] = labelEffective[category];
     }
-    return { assertions, failures, mismatchedCategories };
+    return { assertions, failures, mismatchedCategories, falsePositive };
 }
