@@ -1,5 +1,5 @@
 import base64
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 import cv2
 import numpy as np
 
@@ -54,6 +54,29 @@ class ChartProcessor:
                 cv2.rectangle(debug_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
         return debug_image
+    
+    def __populate_legend_information(self, legend_items: List[Dict]) -> Dict:
+        legend_information = {}
+        for item in legend_items:
+            if 'text' in item and 'color' in item and 'confidence' in item:
+                b, g, r = item['color']
+                x, y, w, h = item['bounding_box']
+                legend_information[item['text']] = {
+                    'color': {'r': r, 'g': g, 'b': b},
+                    'confidence': item['confidence'] / 100,  # Convert confidence to a decimal
+                    'bounding_box': {'x': x, 'y': y, 'width': w, 'height': h}
+                }
+        return legend_information
+    
+    def __populate_labels_information(self, labels: List[Dict]) -> Dict:
+        labels_information = {}
+        for label in labels:
+            x, y, w, h = label['position']
+            labels_information[label['text']] = {
+                'confidence': label['confidence'] / 100,
+                'bounding_box': {'x': x, 'y': y, 'width': w, 'height': h}
+            }
+        return labels_information
 
     def process_image(self, image_bytes: bytes) -> Dict:
         """
@@ -80,6 +103,7 @@ class ChartProcessor:
         label_keys = {label['text'] for label in labels}
         result_keys = {result['label'] for result in results}
 
+        # Step 7: Format JSON
         missing_labels = label_keys - result_keys
 
         for missing_label in missing_labels:
@@ -89,26 +113,8 @@ class ChartProcessor:
                 'value': None
             })
 
-        # Step 7: Populate legend
-        legend_information = {}
-        for item in legend_items:
-            if 'text' in item and 'color' in item and 'confidence' in item:
-                b, g, r = item['color']
-                x, y, w, h = item['bounding_box']
-                legend_information[item['text']] = {
-                    'color': {'r': r, 'g': g, 'b': b},
-                    'confidence': item['confidence'] / 100,  # Convert confidence to a decimal
-                    'bounding_box': {'x': x, 'y': y, 'width': w, 'height': h}
-                }
-
-        labels_informations = {}
-        for label in labels:
-            x, y, w, h = label['position']
-            labels_informations[label['text']] = {
-                'confidence': label['confidence'] / 100,
-                'bounding_box': {'x': x, 'y': y, 'width': w, 'height': h}
-            }
-            
+        legend_information = self.__populate_legend_information(legend_items)
+        labels_informations = self.__populate_labels_information(labels)            
 
         json_results = {
             'data': self.json_formatter.prepare_json(results, 'value'),
@@ -117,6 +123,6 @@ class ChartProcessor:
             'labels': labels_informations,
             'confidence_values': self.json_formatter.prepare_json(results, 'confidence')
         }
-        # Step 8: Format JSON
+        
         return json_results
 
