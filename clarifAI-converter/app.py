@@ -18,11 +18,11 @@ app = Flask(__name__)
 def extract():
     file = request.files['image']
     whitelist = request.form.get('whitelist', ChartProcessorConfig.INTEGER)
-    print(whitelist)
+    # print(whitelist)
     value_extractor_type = request.form.get('value_extractor_type', 'default')
     tmp = CHART_AREA_MARGINS['left']
     CHART_AREA_MARGINS['left'] = float(request.form.get('left', CHART_AREA_MARGINS['left']))
-    print(CHART_AREA_MARGINS['left'])
+    # print(CHART_AREA_MARGINS['left'])
     lang = request.form.get('lang', 'eng')
 
     # Carica l'immagine in OpenCV

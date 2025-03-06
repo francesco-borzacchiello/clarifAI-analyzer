@@ -1,13 +1,13 @@
 import { TestInfo } from '@playwright/test';
 import { VisionDeficiency } from '../enums/visionDeficiency';
-import { AnnotatedBarChartJson, BarChartJson } from '../types';
+import { ClarifAIConverterFullResponse, BarChartJson, ClarifAIConverterAnalysisResult } from '../types';
 
 export function logImageAndJson(
     testInfo: TestInfo,
     imageName: string,
     image: Buffer,
     fileNameJson: string | null,
-    json: AnnotatedBarChartJson
+    json: ClarifAIConverterFullResponse
 ) {
     testInfo.attach(imageName, {
         body: image,
@@ -23,15 +23,25 @@ export function logImageAndJson(
         contentType: 'image/png',
     });
 
-    if (fileNameJson)
-        logJson(testInfo, fileNameJson, json.data);
+
+    if (fileNameJson){
+        const { processed_image, ...jsonWithoutImage } = json;
+        logJson(testInfo, fileNameJson, jsonWithoutImage);
+    }
 }
 
-export function logJson(testInfo: TestInfo, fileNameJson: string, json: BarChartJson) {
+export function logJson(testInfo: TestInfo, fileNameJson: string, json: BarChartJson | ClarifAIConverterAnalysisResult) {
     testInfo.attach(fileNameJson, {
         contentType: 'application/json',
-        body: JSON.stringify(json, null, 2),
+        body: JSON.stringify('data' in json ? (json as ClarifAIConverterAnalysisResult).data : json, null, 2),
     });
+
+    if ('data' in json) {
+        testInfo.attach(`complete_${fileNameJson}`, {
+            contentType: 'application/json',
+            body: JSON.stringify(json, null, 2),
+        });
+    }
 }
 
 export function generateStringWithOptionalParts(
@@ -88,3 +98,7 @@ export function generateUrlWithParams(
 ): string {
     return generateStringWithOptionalParts(baseUrl, from, to, null, null, '&');
 }
+
+export function capitalizeFirstLetter(string: string): string {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }

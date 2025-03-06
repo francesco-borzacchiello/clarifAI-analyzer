@@ -19,7 +19,7 @@ export const testCases: { [key: string]: UnFunctionalTestCase } = {
     'Chart with legend and integer values - (2020-12-01 - 2021-09-05) - with oracle': {
         url: '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db',
         oracle:{
-            "Agust--in Maugus": {
+            "Agustin Maugus Carlos": {
                 "Low Risk": 2
             },
             "Ben Cumpton": {

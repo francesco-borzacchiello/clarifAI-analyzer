@@ -10,23 +10,23 @@ export async function compareChartsForIntervals(
     largerInterval: { from: string, to: string },
     smallerInterval: { from: string, to: string }
 ) {
-    const largerIntervalJson = await captureAndExtractJsonForInterval(
+    const largerIntervalJson = (await captureAndExtractJsonForInterval(
         page,
         testInfo,
         baseUrlChart,
         canvasSelector,
         largerInterval.from,
         largerInterval.to,
-    );
+    )).data;
 
-    const smallerIntervalJson = await captureAndExtractJsonForInterval(
+    const smallerIntervalJson = (await captureAndExtractJsonForInterval(
         page,
         testInfo,
         baseUrlChart,
         canvasSelector,
         smallerInterval.from,
         smallerInterval.to
-    );
+    )).data;
 
     await expect(largerIntervalJson).containsTheInterval(smallerIntervalJson);
 }

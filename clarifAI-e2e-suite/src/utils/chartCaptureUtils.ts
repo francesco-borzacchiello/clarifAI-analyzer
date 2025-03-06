@@ -1,6 +1,6 @@
 import { Page, TestInfo } from "@playwright/test";
 import { VisionDeficiency } from "../enums/visionDeficiency";
-import { BarChartJson } from "../types";
+import { BarChartJson, ClarifAIConverterAnalysisResult, Labels } from "../types";
 import { generateImageFileName, generateJsonFileName, logImageAndJson } from "./utils";
 import { extractJsonForFunctionalTesting, extractJsonForReadability } from "../chartProcessor";
 import { BASE_SCREENSHOT_PATH } from "../constants";
@@ -14,7 +14,7 @@ async function captureAndExtractJson(
     jsonFilePath: string | null,
     deficiencyType: VisionDeficiency,
     extractorType: 'readability' | 'functional'
-): Promise<BarChartJson> {
+): Promise<ClarifAIConverterAnalysisResult> {
     const screenshotBuffer = await captureScreenshotWithVisionDeficiency(page, outputFilePath, canvasSelector, baseUrlChart, deficiencyType);
 
     const jsonDeficiency = extractorType === 'readability'
@@ -23,7 +23,9 @@ async function captureAndExtractJson(
 
     logImageAndJson(testInfo, outputFilePath, screenshotBuffer, jsonFilePath, jsonDeficiency);
 
-    return jsonDeficiency.data;
+    const { processed_image, ...jsonWithoutImage } = jsonDeficiency;
+
+    return jsonWithoutImage;
 }
 
 // Funzione per fare lo screenshot del canvas
@@ -75,7 +77,7 @@ export async function captureAndExtractJsonForReadability(
     outputFilePath: string,
     jsonFilePath: string | null,
     deficiencyType: VisionDeficiency
-): Promise<BarChartJson> {
+): Promise<ClarifAIConverterAnalysisResult> {
     return captureAndExtractJson(
         page,
         testInfo,
@@ -95,7 +97,7 @@ export async function captureAndExtractJsonForFunctionalTesting(
     canvasSelector: string,
     outputFilePath: string,
     jsonFilePath: string
-): Promise<BarChartJson> {
+): Promise<ClarifAIConverterAnalysisResult> {
     return captureAndExtractJson(
         page,
         testInfo,
@@ -115,7 +117,7 @@ export async function captureAndExtractJsonForInterval(
     canvasSelector: string,
     from: string,
     to: string
-): Promise<BarChartJson> {
+): Promise<ClarifAIConverterAnalysisResult> {
     return captureAndExtractJsonForFunctionalTesting(
         page,
         testInfo,

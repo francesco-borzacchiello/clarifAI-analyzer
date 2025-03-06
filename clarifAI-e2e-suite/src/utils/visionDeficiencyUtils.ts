@@ -2,7 +2,7 @@ import test, { Page, TestInfo } from '@playwright/test';
 import { VisionDeficiency } from '../enums/visionDeficiency';
 import { logJson } from './utils';
 import { expect } from '../assertions/visionDeficiencyAssertions';
-import { BarChartJson } from '../types';
+import { BarChartJson, ClarifAIConverterAnalysisResult } from '../types';
 import { captureAndExtractJsonForReadability } from './chartCaptureUtils';
 import { getNormalVisionReference } from './readabilityUtils';
 
@@ -14,7 +14,7 @@ export async function testVisionDeficiencyVersusNormalVision(
     outputFilePath: string, 
     jsonFilePath: string, 
     deficiencyType: VisionDeficiency,
-    oracle: BarChartJson | null = null
+    oracle: ClarifAIConverterAnalysisResult | BarChartJson | null = null
 ) {
     if (oracle) logJson(testInfo, "oracle.json", oracle)
         else await test.step('Compute oracle using normal vision as a reference', async () => {
@@ -52,7 +52,7 @@ export async function testProtanopia(
     canvasSelector: string, 
     outputFilePath: string, 
     jsonFilePath: string,
-    oracle: BarChartJson | null = null
+    oracle: ClarifAIConverterAnalysisResult | null = null
 ) {
     return await testVisionDeficiencyVersusNormalVision(
         page,
@@ -73,7 +73,7 @@ export async function testDeuteranopia(
     canvasSelector: string, 
     outputFilePath: string, 
     jsonFilePath: string,
-    oracle: BarChartJson | null = null
+    oracle: ClarifAIConverterAnalysisResult | null = null
 ) {
     return await testVisionDeficiencyVersusNormalVision(
         page,
@@ -94,7 +94,7 @@ export async function testTritanopia(
     canvasSelector: string, 
     outputFilePath: string, 
     jsonFilePath: string,
-    oracle: BarChartJson | null = null
+    oracle: ClarifAIConverterAnalysisResult | null = null
 ) {
     return await testVisionDeficiencyVersusNormalVision(
         page,

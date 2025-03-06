@@ -1,5 +1,5 @@
 import { Page, TestInfo } from "@playwright/test";
-import { BarChartJson } from "../types";
+import { BarChartJson, ClarifAIConverterAnalysisResult, Labels } from "../types";
 import { captureAndExtractJsonForReadability } from "./chartCaptureUtils";
 import { VisionDeficiency } from "../enums/visionDeficiency";
 import { expect } from "../assertions/readabilityAssertions";
@@ -12,7 +12,7 @@ export async function getNormalVisionReference(
     canvasSelector: string, 
     outputFilePath: string, 
     jsonFilePath: string | null = null
-): Promise<BarChartJson> {
+): Promise<ClarifAIConverterAnalysisResult> {
     return await captureAndExtractJsonForReadability(
         page,
         testInfo,

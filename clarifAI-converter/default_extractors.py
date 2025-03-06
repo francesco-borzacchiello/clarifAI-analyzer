@@ -66,20 +66,24 @@ class DefaultLabelExtractor(LabelExtractor):
                         if same_line and close_enough:
                             # Concatenate labels if confidence is high enough
                             if conf > 60:
-                                last_label['text'] += f" {word}"
-                                last_label['position'] = (
-                                    last_x,
-                                    last_y,
-                                    (x + w) - last_x,
-                                    max(last_h, h)
-                                )
+                                if last_label['text'] != None:
+                                    last_label['text'] += f" {word}"
+                                    last_label['position'] = (
+                                        last_x,
+                                        last_y,
+                                        (x + w) - last_x,
+                                        max(last_h, h)
+                                    )
+                                else:
+                                    last_label['text'] = word
+                                    last_label['position'] = (x, top + y, w, h)
                             # Update the list of confidences
                             last_label['confidences'].append(conf)
                             continue
 
                     labels.append({
-                        'text': word if conf > 60 else '',
-                        'position': (x, top + y, w, h),
+                        'text': word if conf > 0 else None,
+                        'position': (x, top + y, w, h) if conf > 0 else None,
                         'confidences': [conf],
                         'y_center': y_center
                     })
@@ -369,7 +373,7 @@ class InitialValueExtractor(ValueExtractor):
                             'label': label_text,
                             'legend_item': text,
                             'value': int(value_text) if value_text.isdigit() else value_text,
-                            'confidence': max([conf for _, conf in filtered_text_data])
+                            'confidence': max([conf for _, conf in filtered_text_data]) / 100
                         })
                     elif not any(item['label'] == label_text and item['legend_item'] == legend['text'] for item in results):
                         results.append({
@@ -455,7 +459,7 @@ class DefaultValueExtractor(InitialValueExtractor):
                             'label': label_text,
                             'legend_item': legend['text'],
                             'value': best_value,
-                            'confidence': max_conf,
+                            'confidence': max_conf / 100,
                             'step': 2
                         })
                     # STEP FINALE: OCR su tutta la bar_area e calcolo distanza minima dal centroide della maschera
@@ -501,7 +505,7 @@ class DefaultValueExtractor(InitialValueExtractor):
                                 'label': label_text,
                                 'legend_item': legend['text'],
                                 'value': closest_value,
-                                'confidence': conf,
+                                'confidence': conf / 100,
                                 'step': 3
                             })
         return results

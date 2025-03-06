@@ -2,14 +2,14 @@ import axios from 'axios'; // Assicurati di installare axios: npm install axios
 import fs from 'fs'; // Libreria nativa per leggere i file
 import FormData from 'form-data';
 
-import { AnnotatedBarChartJson } from "./types";
+import { ClarifAIConverterFullResponse } from "./types";
 
 async function extractJsonFromBarChart(
     image: Buffer | string,
     whitelist: string = 'integer',
     valueExtractorType: string = 'initial',
     lang: string = 'eng'
-): Promise<AnnotatedBarChartJson> {
+): Promise<ClarifAIConverterFullResponse> {
     const apiUrl = 'http://127.0.0.1:5000/extract-json-from-horizontal-bar-chart';
     try {
         let fileBuffer: Buffer;
@@ -39,12 +39,12 @@ async function extractJsonFromBarChart(
 
 export async function extractJsonForReadability(
     imagePath: string | Buffer
-): Promise<AnnotatedBarChartJson> {
+): Promise<ClarifAIConverterFullResponse> {
     return extractJsonFromBarChart(imagePath, '0123456789', 'initial');
 }
 
 export async function extractJsonForFunctionalTesting(
     imagePath: string | Buffer
-): Promise<AnnotatedBarChartJson> {
+): Promise<ClarifAIConverterFullResponse> {
     return extractJsonFromBarChart(imagePath, '0123456789', 'default');
 }

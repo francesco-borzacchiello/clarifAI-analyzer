@@ -1,14 +1,16 @@
 import { test, expect as baseExpext } from '@playwright/test';
-import { BarChartJson } from "../types";
+import { BarChartJson, ClarifAIConverterAnalysisResult } from "../types";
 import { equalsChartJsons } from '../utils/chartJsonComparisonUtils';
 
 export const expect = baseExpext.extend({
   async isReadable(
     oracle: BarChartJson,
-    effective: BarChartJson,
+    effective: ClarifAIConverterAnalysisResult,
     errorMessage: string
   ) {
-    const { assertions, failures, mismatchedItems, falsePositive } = equalsChartJsons(oracle, effective, errorMessage);
+    const effectiveData: BarChartJson = effective.data;
+
+    const { assertions, failures, mismatchedItems, falsePositive } = equalsChartJsons(oracle, effectiveData, errorMessage);
     const percentage = (failures / assertions) * 100;
     
     let readabilityMessage: string;
@@ -16,10 +18,10 @@ export const expect = baseExpext.extend({
     else if (percentage <= 50) readabilityMessage = 'partially readable';
     else readabilityMessage = 'not readable';
 
-    let resultMessage = `The chart is ${readabilityMessage}. Assertions: ${assertions}, Failures: ${failures}, Failure rate: ${percentage.toFixed(2)}%`;
+    let resultMessage = `The chart is ${readabilityMessage}.\n\t● Assertions: ${assertions}\n\t● Failures: ${failures}\n\t● Failure rate: ${percentage.toFixed(2)}%`;
 
     test.info().annotations.push({
-        type: "readability-check",
+        type: "Readability check",
         description: resultMessage
     });
 
@@ -36,12 +38,12 @@ export const expect = baseExpext.extend({
         const mismatchedItemsList = Array.from(mismatchedItems)
           .map(([label, categories]) => {
             const oracleCategoriesCount = oracle[label] ? Object.keys(oracle[label]).length : 0;
-            return `- For employee ${label}, ${categories.size} out of ${oracleCategoriesCount}: ${Array.from(categories).join(', ')}`;
-          }).join('\n');
+            return `● ${label}, ${categories.size} out of ${oracleCategoriesCount} → ${Array.from(categories).join(', ')}`;
+          }).join('\n\t');
       
         test.info().annotations.push({
-          type: "Values of risk categories with readability problems",
-          description: `${totalMismatchedElements} on ${totalCategoriesInOracle} (${((totalMismatchedElements / totalCategoriesInOracle) * 100).toFixed(2)}%), in detail:\n${mismatchedItemsList}`
+          type: "Risk Category Values with Readability Issues",
+          description: `${totalMismatchedElements} on ${totalCategoriesInOracle} (${((totalMismatchedElements / totalCategoriesInOracle) * 100).toFixed(2)}%), detailed as follows:\n\t${mismatchedItemsList}`
         });
       }
 
@@ -49,21 +51,41 @@ export const expect = baseExpext.extend({
         .reduce((acc, categories) => acc + Object.keys(categories).length, 0);
 
       if(totalUnexpectedCategories > 0) {
-        let falsePositiveList = Object.entries(falsePositive)
+        const falsePositiveList = Object.entries(falsePositive)
           .map(([label, categories]) => {
             const categoriesList = Object.entries(categories)
               .map(([category, value]) => {
                 const valueString = value ? ` value ${value}` : 'out value';
                 return `${category} with${valueString}`;
               }).join(', ');
-            return `- For employee ${label}: ${categoriesList}`;
-          }).join('\n');
+            return `● ${label}: ${categoriesList}`;
+          }).join('\n\t');
         
         test.info().annotations.push({
-          type: "Unexpected Categories of Risk",
-          description: `Altogether there are ${totalUnexpectedCategories} unexpected categories of risk, in detail:\n${falsePositiveList}`
+          type: `Unexpected Risk Categories`,
+          description: `A total of ${totalUnexpectedCategories} cases, detailed as follows:\n\t${falsePositiveList}`
         });
       }
+
+      // Count the number of labels with confidence less than 0.8
+      const lowConfidenceLabelsCount = Object.values(effective.labels)
+        .filter(label => label.confidence < 0.8)
+        .length;
+        
+        if (lowConfidenceLabelsCount > 0) {      
+          const totalLowConfidenceLabels = Object.values(effective.labels).length;
+  
+          const lowConfidenceLabels = Object.entries(effective.labels)
+            .filter(([label, { confidence }]) => confidence < 0.8)
+            .map(([label, { confidence }]) => `● ${label}: Confidence ${(confidence * 100).toFixed(2)}%`)
+            .join('\n\t');
+
+
+          test.info().annotations.push({
+            type: "Labels with Readability Issues",
+            description: `${lowConfidenceLabelsCount} on ${totalLowConfidenceLabels}, in detail:\n\t${lowConfidenceLabels}`
+          });
+        }
     }
 
     return {

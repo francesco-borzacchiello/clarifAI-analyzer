@@ -5,6 +5,7 @@ import { captureAndExtractJsonForInterval } from '../src/utils/chartCaptureUtils
 import { expect } from '../src/assertions/functionalAssertions';
 import { BASE_URL, CANVAS_SELECTOR } from '../src/constants';
 import { intervalPairs } from '../src/testCases';
+import { BarChartJson } from '../src/types';
 
 test.beforeEach(async ({ page }) => {
     // Esegui la login con il valore corrente di baseUrlChart
@@ -89,14 +90,14 @@ test.describe.parallel('Confronto tra grafici con intervalli diversi', () => {
 test('Chart with legend and integer values - (2020-11-30 - 2021-02-15) - Functional checks', async ({ page }, testInfo) => {
     const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
 
-    const chartDescription = await captureAndExtractJsonForInterval(
+    const chartDescription: BarChartJson = (await captureAndExtractJsonForInterval(
             page,
             testInfo,
             baseUrlChart,
             CANVAS_SELECTOR,
             "2020-11-30",
             "2021-02-15"
-        );
+        )).data;
 
     await expect.soft(chartDescription).hasLabel("Constantina Quintanar");    
     await expect.soft(chartDescription).hasLabel("Luis Segura");
@@ -108,14 +109,14 @@ test('Chart with legend and integer values - (2020-11-30 - 2021-02-15) - Functio
 test('Chart with one category and integer values - (2020-11-30 - 2021-02-15) - Functional checks', async ({ page }, testInfo) => {
   const baseUrlChart = BASE_URL + '/d/e2740b66-3972-408a-8299-5e7d5af64233/measurements-per-person-1?orgId=1&var-group=All&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db';
 
-  const chartDescription = await captureAndExtractJsonForInterval(
+  const chartDescription: BarChartJson = (await captureAndExtractJsonForInterval(
           page,
           testInfo,
           baseUrlChart,
           CANVAS_SELECTOR,
           "2020-11-30",
           "2021-02-15"
-      );
+      )).data;
 
   await expect.soft(chartDescription).hasCategoryValue("Elsa Elias", 12);
 });

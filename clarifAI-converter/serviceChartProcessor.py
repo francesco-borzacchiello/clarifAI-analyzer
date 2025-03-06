@@ -43,4 +43,4 @@ if __name__ == "__main__":
     # with open("C:\\Users\\fborz\\OneDrive - Università di Napoli Federico II\\Tesi Magistrale\\Esperimenti\\Playwright\\learning-phase\\chart-3-from=1606777200000-to=1630792800000-1920x1080.png", "rb") as img_file:
         image_bytes = img_file.read()
     result = image_to_json(image_bytes, ChartProcessorConfig.INTEGER, 'default', 'eng')
-    print(result)
+    # print(result)
