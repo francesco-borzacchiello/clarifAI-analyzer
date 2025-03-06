@@ -42,5 +42,5 @@ class ValueExtractor(ABC):
 
 class JSONFormatter(ABC):
     @abstractmethod
-    def prepare_json(self, results: List[Dict]) -> Dict:
+    def prepare_json(self, results: List[Dict], value_id: str) -> Dict:
         pass

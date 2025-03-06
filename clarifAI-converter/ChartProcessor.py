@@ -111,10 +111,11 @@ class ChartProcessor:
             
 
         json_results = {
-            'data': self.json_formatter.prepare_json(results),
+            'data': self.json_formatter.prepare_json(results, 'value'),
             'processed_image': self.__annotate_image(image, labels, contours, legend_items),
             'legend': legend_information,
-            'labels': labels_informations
+            'labels': labels_informations,
+            'confidence_values': self.json_formatter.prepare_json(results, 'confidence')
         }
         # Step 8: Format JSON
         return json_results

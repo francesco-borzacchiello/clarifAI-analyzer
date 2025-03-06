@@ -343,25 +343,40 @@ class InitialValueExtractor(ValueExtractor):
                     gray_cropped_area = cv2.cvtColor(cropped_masked_area, cv2.COLOR_BGR2GRAY)
 
                     # Applica Tesseract per trovare valori numerici
-                    value_data = pytesseract.image_to_string(
+                    value_data = pytesseract.image_to_data(
                         gray_cropped_area,
                         config=f'-c tessedit_char_whitelist={ChartProcessorConfig.tesseract_whitelist} --psm 6',
                         output_type=pytesseract.Output.DICT
                     )
 
                     # Estrai il testo rilevato
-                    extracted_text = value_data.get('text', '').strip()
-                    if extracted_text.isdigit() or re.match(percentage_regex, extracted_text):  # Consideriamo solo numeri validi
+                    extracted_text = value_data.get('text', '')
+                    confidences = value_data['conf']
+
+                    # Filtra i risultati per ottenere solo quelli con una confidenza sufficiente
+                    filtered_text_data = [
+                        (extracted_text[i], confidences[i])
+                        for i in range(len(extracted_text))
+                        if confidences[i] > 60  # Soglia di confidenza
+                    ]
+
+                    # Unisci i testi filtrati in una singola stringa
+                    value_text = ' '.join([text for text, _ in filtered_text_data]).strip()
+
+                    # Aggiungi il valore ai risultati se il testo è valido
+                    if value_text.isdigit() or re.match(percentage_regex, value_text):  # Consideriamo solo numeri validi
                         results.append({
                             'label': label_text,
                             'legend_item': text,
-                            'value': int(extracted_text) if extracted_text.isdigit() else extracted_text
+                            'value': int(value_text) if value_text.isdigit() else value_text,
+                            'confidence': max([conf for _, conf in filtered_text_data])
                         })
                     elif not any(item['label'] == label_text and item['legend_item'] == legend['text'] for item in results):
                         results.append({
                             'label': label_text,
                             'legend_item': text,
-                            'value': None
+                            'value': None,
+                            'confidence': None
                         })
         return results
 
@@ -440,6 +455,7 @@ class DefaultValueExtractor(InitialValueExtractor):
                             'label': label_text,
                             'legend_item': legend['text'],
                             'value': best_value,
+                            'confidence': max_conf,
                             'step': 2
                         })
                     # STEP FINALE: OCR su tutta la bar_area e calcolo distanza minima dal centroide della maschera
@@ -485,18 +501,19 @@ class DefaultValueExtractor(InitialValueExtractor):
                                 'label': label_text,
                                 'legend_item': legend['text'],
                                 'value': closest_value,
+                                'confidence': conf,
                                 'step': 3
                             })
         return results
 
 class DefaultJSONFormatter(JSONFormatter):
-    def prepare_json(self, results: List[Dict]):
+    def prepare_json(self, results: List[Dict], value_id: str):
         # Trasforma i risultati in una struttura JSON-friendly
         json_result = {}
         for entry in results:
             label = entry['label']
             legend_item = entry['legend_item']
-            value = entry['value']
+            value = entry[value_id]
 
             # Aggiungi la label al JSON, se non già presente
             if label not in json_result:
