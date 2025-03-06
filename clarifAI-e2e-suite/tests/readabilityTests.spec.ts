@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
    await login(page);
 });
 
-test('chart-3 - solaris - (2020-12-01 - 2021-09-05) - Readability', async ({ page }, testInfo) => {
+test.only('chart-3 - solaris - (2020-12-01 - 2021-09-05) - Readability', async ({ page }, testInfo) => {
     let from = "2020-12-01", to = "2021-09-05";
     const baseUrlChart = BASE_URL + '/d/ac159a53-38b3-4646-9fb3-6620b4ff7a7f/count-of-high-risk-all-and-confirmed-vs-low-risk-results-by-user-3?orgId=1&var-employee=All&var-includeDisabledEmployees=false&var-datasource=PostgreSQL-solaris-global_db' + "&from=" + Date.parse(from) + "&to=" + Date.parse(to);
 

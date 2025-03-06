@@ -35,14 +35,6 @@ class DefaultLabelExtractor(LabelExtractor):
 
         label_area = image[top:bottom, :int(width * CHART_AREA_MARGINS['left'])]
 
-        '''
-        plt.figure(figsize=(10, 5))
-        plt.title("Label Area")
-        plt.imshow(cv2.cvtColor(label_area, cv2.COLOR_BGR2RGB))
-        plt.show(block=True)
-        '''
-
-        # Configure tesseract for line detection
         custom_config = r'--psm 6'
         text_data = pytesseract.image_to_data(label_area, config=custom_config, output_type=pytesseract.Output.DICT, lang=ChartProcessorConfig.lang)
 
@@ -50,9 +42,10 @@ class DefaultLabelExtractor(LabelExtractor):
         threshold_distance = 20  # Maximum distance between labels to consider them close enough
 
         for i, word in enumerate(text_data['text']):
-            if word.strip() and text_data['conf'][i] > 60:  # Filter out low confidence detections
+            if word.strip() and text_data['conf'][i] > 0:  # Filter out noise detections
                 x, y = text_data['left'][i], text_data['top'][i]
                 w, h = text_data['width'][i], text_data['height'][i]
+                conf = text_data['conf'][i]
 
                 # Calculate the center of the label
                 y_center = top + (y + (h // 2))
@@ -71,21 +64,30 @@ class DefaultLabelExtractor(LabelExtractor):
                         close_enough = (x - (last_x + last_w)) <= threshold_distance
 
                         if same_line and close_enough:
-                            # Concatenate labels
-                            last_label['text'] += f" {word}"
-                            last_label['position'] = (
-                                last_x,
-                                last_y,
-                                (x + w) - last_x,
-                                max(last_h, h)
-                            )
+                            # Concatenate labels if confidence is high enough
+                            if conf > 60:
+                                last_label['text'] += f" {word}"
+                                last_label['position'] = (
+                                    last_x,
+                                    last_y,
+                                    (x + w) - last_x,
+                                    max(last_h, h)
+                                )
+                            # Update the list of confidences
+                            last_label['confidences'].append(conf)
                             continue
 
                     labels.append({
-                        'text': word,
+                        'text': word if conf > 60 else '',
                         'position': (x, top + y, w, h),
+                        'confidences': [conf],
                         'y_center': y_center
                     })
+        
+        # Calculate the average confidence for each label
+        for label in labels:
+            label['confidence'] = sum(label['confidences']) / len(label['confidences'])
+            del label['confidences']  # Remove the list of confidences
 
         return labels
 
